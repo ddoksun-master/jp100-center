@@ -1305,7 +1305,7 @@ html[data-mode] .lkh{font-size:var(--t3)}
 <div class="wdim" id="wel"><div class="wbox" id="welBox"></div></div>
 <script>
 const $=id=>document.getElementById(id);
-const API_URL=''https://script.google.com/macros/s/AKfycbxM35BNwTKcV6675EaaScVbBs_9oQw5LVAfGmfCjdVL8K8zhdsuRkmVEDpZ0bvjxds8/exec';   // ★ GitHub Pages 에 올릴 때: 웹 앱 주소(/exec) 한 줄. 공개 주소라 비밀 아님 (관리자 PIN 은 이 화면에 없음)
+const API_URL='https://script.google.com/macros/s/AKfycbxM35BNwTKcV6675EaaScVbBs_9oQw5LVAfGmfCjdVL8K8zhdsuRkmVEDpZ0bvjxds8/exec';   // ★ GitHub Pages 에 올릴 때: 웹 앱 주소(/exec) 한 줄. 공개 주소라 비밀 아님 (관리자 PIN 은 이 화면에 없음)
 const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
 const MODE=IN_GAS?'gas':(API_URL?'web':'mock');   // gas = 구글 웹 앱 안(google.script.run) / web = GitHub Pages(fetch) / mock = 미리보기 데이터
 const LIVE=MODE!=='mock';
