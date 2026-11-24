@@ -1,0 +1,21 @@
+name: photos
+on:
+  push:
+    paths: ['photos/*', 'tools/make_photos.py']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install "pillow==11.*"
+      - run: python tools/make_photos.py
+      - run: |
+          git config user.name "photo-bot"
+          git config user.email "photo-bot@users.noreply.github.com"
+          git add photos/web
+          git diff --cached --quiet || (git commit -m "photos: auto resize" && git push)
