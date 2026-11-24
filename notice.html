@@ -2145,7 +2145,7 @@ html.going .gobar{display:block}html.going .gomsg{display:flex}
 .pwp.full .pwp-go{margin-top:.6rem}
 .pwp.full .pwp-ft{justify-content:center;margin-top:.7rem}.pwp.full .pwp-nt{margin:.3rem 0 0}
 </style>
-<style id="pwpcssC">
+<style id="pwpcssC">.pwp .pwp-rows{gap:.2rem!important}.pwp .pwp-lb{margin:0!important}.pwp .pwp-row+.pwp-lb{margin-top:1.2rem!important}
 /* 비밀번호 정하기: 대제목 한 줄(폭에 맞춰 줄어듦) · 점 위 라벨 */
 .pwp.full .pwp-h b{display:inline-block;white-space:nowrap;letter-spacing:-.02em}
 .pwp .pwp-lb{text-align:center;font-size:1.1em;font-weight:800;color:#2F3A45;margin:0 0 .7rem}
@@ -2181,8 +2181,8 @@ window.PWP=(function(){
         +'<div class="pwp-pg"><i class="on"></i><i class="'+(st===2?'on':'')+'"></i><b>'+st+' / 2</b></div>'
         +'<div class="pwp-h"><b id="pwpH">'+(st===1?'회원조회·변경·취소 시 필요합니다.':'한 번 더 입력해 주세요')+'</b></div>'+who
         +'<div class="pwp-rows">'
-          +(st===1?'<div class="pwp-lb">비밀번호 설정</div><div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div>'
-                    :'<div class="pwp-lb">비밀번호 확인</div><div class="pwp-row" id="pwpRB">'+bx('pwpB')+'</div>')
+          +(st===1?'<div class="pwp-lb">비밀번호 설정</div>':'')+'<div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div>'
+          +(st===2?'<div class="pwp-lb">비밀번호 확인</div><div class="pwp-row" id="pwpRB">'+bx('pwpB')+'</div>':'')
         +'</div>'
         +'<button type="button" class="pwp-sh" id="pwpSh">다시 입력</button>'
         +'<div class="pwp-msg" id="pwpE" aria-live="polite"></div>'
@@ -2205,7 +2205,12 @@ window.PWP=(function(){
     if($('pwpRq')) $('pwpRq').onclick=reqReset;
     upd(); fitH();
   }
-  function fitH(){ var b=$('pwpH'); if(!b) return; b.style.fontSize=''; var w=b.parentElement.clientWidth; if(!w) return; var m=parseFloat(getComputedStyle(b).fontSize), sw=b.scrollWidth; if(sw>w) b.style.fontSize=(Math.floor(m*w/sw*10)/10-.2)+'px'; }
+  var HFS='', KPH=0;
+  function fitH(){ var b=$('pwpH'); if(!b) return; var w=b.parentElement.clientWidth; if(!w) return;
+    if(STEP===1||!HFS){ var tx=b.textContent; b.textContent='회원조회·변경·취소 시 필요합니다.'; b.style.fontSize=''; var m=parseFloat(getComputedStyle(b).fontSize), sw=b.scrollWidth; HFS=sw>w?(Math.floor(m*w/sw*10)/10-.2)+'px':''; b.textContent=tx; }
+    b.style.fontSize=HFS;   /* 2단계도 1단계와 같은 글자 크기 */
+    var k=$('pwpK'); if(k){ if(STEP===1) KPH=k.offsetHeight; else if(KPH) k.style.cssText='flex:none;height:'+KPH+'px'; }   /* 키패드도 1단계와 같은 높이 */
+  }
   addEventListener('resize',function(){ if(O) fitH(); });
   function cells(id,v,cur){ var c=$(id); if(!c) return; var is=c.children; for(var i=0;i<4;i++){ is[i].textContent=i<v.length?(SH?v.charAt(i):'●'):''; is[i].className=cur&&i===v.length?'nx':''; } }
   function press(k){
