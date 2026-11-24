@@ -1554,7 +1554,7 @@ function calHtml(){
   const a0=iso(wkStart()), a6=iso(addD(wkStart(),13)), d0=mAnc();
   const range=w?dshI(a0).replace(/\(.\)/,'')+' ~ '+dshI(a6).replace(/\(.\)/,''):d0.getFullYear()+'년 '+(d0.getMonth()+1)+'월';
   const alw='';
-  const tg='<div class="v7tg"><button type="button" class="'+(w?'on':'')+'" onclick="setNV(\'w\')">2주</button><button type="button" class="'+(w?'':'on')+'" onclick="setNV(\'m\')">월간</button></div>';
+  const tg='<div class="v7tg"><button type="button" class="'+(w?'on':'')+'" onclick="setNV(\'w\')">2주</button><button type="button" class="'+(w?'':'on')+'" onclick="setNV(\'m\')">월간</button>'+(telHref(tel())?'<a class="v7tel" href="'+telHref(tel())+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="16" height="16"')+'<span>센터연결</span></a>':'')+'</div>';   /* 전화 = 2주·월간 줄 오른쪽 끝 */
   return '<div class="nsec">'+tg+'<div class="nh"><span class="nr"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button><small>'+range+'</small><button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+'</span>'+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
    +(w?calWeek():calMonth())+dh+list+'</div>';
 }
@@ -1592,7 +1592,7 @@ function navHtml(){
   const t=(on,fn,ic,lb)=>'<button type="button" class="v7t'+(on?' on':'')+'" onclick="'+fn+'"'+(on?' aria-current="page"':'')+'>'+sv(IC[ic],30)+'<span>'+lb+'</span></button>';
   return '<nav class="v7nav" aria-label="하단 메뉴">'+t(TAB==='apply',"goTab('apply')",'note','신청·조회')+t(TAB==='home',"goTab('home')",'cal','일정')+t(false,'openNfa()','who','튼튼머니 출석체크')+'</nav>';
 }
-function fabHtml(){ const h=telHref(tel()); return TAB==='home'&&h?'<a class="v7fab" href="'+h+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="28" height="28"')+'</a>':''; }
+function fabHtml(){ const h=telHref(tel()); return false&&TAB==='home'&&h?'<a class="v7fab" href="'+h+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="28" height="28"')+'</a>':''; }
 function drawNotice(){
   const body=TAB==='apply'?'<div class="v7ap">'+applyHtml()+'</div>':'<div class="v7cal">'+calHtml()+'</div>';
   return '<div class="nview"><div class="ncon v7con">'+body+'</div>'+navHtml()+fabHtml()+'</div>';
@@ -2075,6 +2075,7 @@ html[data-mode=guide] .pwp .pwp-bx i:not(:empty){background:#00457f;border-color
 .v7cal .wk b em{margin:.2rem 0 0;border-radius:.2rem;font-size:.78rem}
 .v7cal .wk b.m em{font-size:.62rem;margin:.12rem 0 0}
 </style>
+<style id="v7telcss">.v7tg{gap:1rem!important;margin:0 0 .1rem!important;padding:0 .2rem!important}.v7tg button{font-size:1.05em!important;padding:.15rem 0 .25rem!important;border-bottom-width:2.5px!important}.v7tg .v7tel{height:2rem!important;padding:0 .7rem!important;font-size:.88rem!important}.v7tg{align-items:center}.v7tg .v7tel{margin-left:auto;flex:none;height:2.3rem;padding:0 .85rem;gap:.35rem;border-radius:999px;box-sizing:border-box;border:2px solid var(--navy,#00457f);color:var(--navy,#00457f);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:.95rem;font-weight:800;white-space:nowrap}.v7tg .v7tel svg{flex:none}.v7tg .v7tel:active{background:#E6F2FB}</style>
 <style id="hpopcss">
 /* 첫 화면 팝업 (관리자설정 > 기본정보): 사진 슬라이드 + 문구 · 하루 한 번 */
 .hpop{position:fixed;inset:0;z-index:85;background:rgba(20,32,44,.55);display:flex;align-items:center;justify-content:center;padding:1.2rem}
