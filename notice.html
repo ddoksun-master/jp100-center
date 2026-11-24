@@ -1334,6 +1334,7 @@ function openInChrome(url){
   //   → 일반 브라우저(크롬·사파리·삼성인터넷)는 그냥 새 탭(https)으로 엶 · 카톡 등 앱 안 브라우저만 외부 브라우저 열기를 시도하고 막히면 일반 링크
   const ua=navigator.userAgent||'', and=/Android/i.test(ua), inApp=/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|; wv\)/i.test(ua);
   const tab=()=>{ const w=window.open(url,'_blank','noopener'); if(!w){ const a=document.createElement('a'); a.href=url; a.target='_top'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); } };
+  if(and&&window.top===window&&!(/Chrome\//.test(ua)&&!/SamsungBrowser|EdgA|OPR\/|Whale|DuckDuckGo|Firefox|; wv\)|KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps/i.test(ua))){ location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end'; return; }   // 안드로이드에서 진짜 크롬이 아닌 모든 브라우저(삼성 인터넷·네이버·카톡 등) → 무조건 크롬 (크롬이 없으면 원래 주소로)
   if(inApp&&and){ const bare=url.replace(/^https?:\/\//,''); const w=window.open('intent://'+bare+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end','_blank'); if(!w) tab(); return; }
   if(inApp&&/KAKAOTALK/i.test(ua)){ const w=window.open('kakaotalk://web/openExternal?url='+encodeURIComponent(url),'_blank'); if(!w) tab(); return; }
   tab(); }
@@ -2257,5 +2258,19 @@ window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endM
 .pwp.full .pwp-kp button{margin:0!important}
 .pwp .pwp-pin,.pwp .pwp-dots{justify-content:center}
 </style>
+<script id="chromebar">
+/* 갤럭시 기본 브라우저(삼성 인터넷)로 열린 회원에게만: 위에 [크롬으로 열기] 띠 (닫으면 이번 방문 동안 안 보임) */
+(function(){ try{
+  var ua=navigator.userAgent||''; if(!/SamsungBrowser/i.test(ua)||!/Android/i.test(ua)||window.top!==window) return;
+  if(window.matchMedia&&matchMedia('(display-mode: standalone)').matches) return;
+  if(sessionStorage.getItem('chromeBar')) return;
+  var d=document.createElement('div'); d.setAttribute('role','region'); d.setAttribute('aria-label','크롬으로 열기 안내');
+  d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:95;display:flex;align-items:center;gap:.5rem;min-height:48px;padding:.3rem .8rem;background:#2F3A45;color:#fff;font:700 14px/1.3 sans-serif';
+  d.innerHTML='<span style="flex:1;min-width:0">크롬에서 열면 더 잘 돼요</span><button type="button" id="cbGo" style="flex:none;height:36px;padding:0 .9rem;border:0;border-radius:8px;background:#F89828;color:#fff;font:800 14px sans-serif">크롬으로 열기</button><button type="button" id="cbX" aria-label="닫기" style="flex:none;width:36px;height:36px;border:0;background:none;color:#fff;font:700 20px sans-serif">×</button>';
+  document.body.appendChild(d);
+  document.getElementById('cbX').onclick=function(){ d.remove(); try{ sessionStorage.setItem('chromeBar','1'); }catch(e){} };
+  document.getElementById('cbGo').onclick=function(){ var u=location.href; location.href='intent://'+u.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(u)+';end'; };
+}catch(e){} })();
+</script>
 </body>
 </html>
