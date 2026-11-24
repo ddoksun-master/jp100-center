@@ -1574,7 +1574,7 @@ let TAB='home', RV='', RERR='', REGNEW=false;
 /* 이 폰에는 '회원코드'만 저장 (이름·전화번호·비밀번호는 저장 안 함) · 한 번 등록하면 계속 유지 */
 const MC_K='nt_mc'; let MCMEM=null;
 let QSMC=/^[A-Z0-9]{4}$/.test(QS.get('mc')||'')?QS.get('mc'):'';   // 다른 화면(체력측정)에서 넘어올 때 주소로 온 회원코드 (한 번만 받아 저장)
-function mcGet(){ if(MODE==='mock') return MCMEM!==null?MCMEM:(QS.get('mc')||''); try{ let v=localStorage.getItem(MC_K)||''; if(!/^[A-Z0-9]{4}$/.test(v)&&QSMC){ v=QSMC; QSMC=''; localStorage.setItem(MC_K,v); } return /^[A-Z0-9]{4}$/.test(v)?v:''; }catch(e){ return ''; } }
+function mcGet(){ if(MODE==='mock') return MCMEM!==null?MCMEM:(QS.get('mc')||''); try{ let v=localStorage.getItem(MC_K)||''; if(QSMC){ v=QSMC; QSMC=''; localStorage.setItem(MC_K,v); try{ if(MODE==='web'){ const u=new URL(location.href); u.searchParams.delete('mc'); history.replaceState(history.state,'',u.pathname+u.search+u.hash); } }catch(e){} }   /* 수강신청·체력측정을 마치고 넘어온 회원 = 이 폰의 회원으로 (등록 자동) */ return /^[A-Z0-9]{4}$/.test(v)?v:''; }catch(e){ return ''; } }
 function mcSet(c){ if(MODE==='mock'){ MCMEM=c; return; } try{ localStorage.setItem(MC_K,c); }catch(e){} }
 let LKST='', RERRM='';   // LKST: ''|load|net|lost  (저장된 회원코드로 불러오는 중 / 연결 실패 / 코드를 못 찾음)
 const isEnd=()=>!!(PUB&&(window.__pvEnd||(PUB.classEnd&&today>PUB.classEnd)));
@@ -1656,8 +1656,8 @@ function savedView(){
   if(LKST==='net') return '<div class="v7pad"><div class="v7hd"><b>불러오지 못했어요</b><span>'+nl2br(RERRM)+'</span></div><button type="button" class="pri" onclick="loadMember()">다시 불러오기</button><div class="v7sm"><button type="button" onclick="reReg()">회원등록 다시하기</button></div></div>';
   return '<div class="v7pad"><div class="v7hd"><b>회원 정보를 찾지 못했어요</b><span>이 폰에 저장된 정보가 맞지 않아요.<br>'+(regOk()?'회원등록을 다시 해 주세요.':'센터로 문의해 주세요.')+'</span></div>'+(regOk()?'<button type="button" class="pri" onclick="reReg()">회원등록 다시하기</button>':'')+'</div>';
 }
-/* 회원등록 다시하기: 등록을 마칠 때까지 지금 코드는 그대로 둠 (돌아가기 하면 원래대로) */
-function reReg(){ ACT=null; LKST=LK?'':LKST; startReg(); }
+/* 회원등록 다시하기: 이 폰의 회원 등록을 풀고 처음(등록 전) 화면으로 → 거기서 [회원 등록]을 다시 누름 */
+function reReg(){ ACT=null; mcSet(''); LK=null; LKST=''; RV=''; RERR=''; try{ if(typeof meClear==='function') meClear(); }catch(e){} draw(); try{ window.scrollTo(0,0); }catch(e){} }
 
 /* ---- 회원 등록 (이름·전화번호 → 비밀번호 → 회원코드) ---- */
 function startReg(){ RV='form'; RERR=''; LI={nm:'',ph:'',pw:''}; draw(); try{ window.scrollTo(0,0); }catch(e){} }
@@ -1830,15 +1830,17 @@ function mergeItems(L){   // v4: 같은 제목·내용·종류가 날짜로 이�
 function init(pub){
   PUB=pub; today=pub.today||iso(new Date()); SELD=today; PUB.items=mergeItems((PUB.items||[]).filter(e=>!FDUP(e))).concat(fitAuto());
   const hs=$('hsub'); if(hs) hs.textContent='수업일정';
-  TAB=(QS.get('lk')==='1'||QS.get('go')==='lookup'||isEnd()||(!(PUB.classStart&&today>=PUB.classStart)&&!mcGet()&&clsOn()))?'apply':'home';   // 첫 화면: 수업 중 = 일정 · 종료 후 = 신청·조회 · 수업 전 = 신청 열려 있으면 신청·조회
+  const MCIN=/^[A-Z0-9]{4}$/.test(QS.get('mc')||'');   // 수강신청을 마치고 넘어옴 → 신청·조회(내 현황)부터
+  TAB=(MCIN||QS.get('lk')==='1'||QS.get('go')==='lookup'||isEnd()||(!(PUB.classStart&&today>=PUB.classStart)&&!mcGet()&&clsOn()))?'apply':'home';   // 첫 화면: 수업 중 = 일정 · 종료 후 = 신청·조회 · 수업 전 = 신청 열려 있으면 신청·조회
   ONK=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon();
-  draw(); if(TAB==='apply') applyEnter(); opData=true; opTry(); if(opDone) setTimeout(()=>homePopMaybe(),300);   // 가림막 없이 바로 뜬 경우(재방문)
+  draw(); if(TAB==='apply') applyEnter(); opData=true; opTry(); if(opDone&&!MCIN) setTimeout(()=>homePopMaybe(),300);   // 가림막 없이 바로 뜬 경우(재방문)
 }
 window.onOpened=function(){ homePopMaybe(); };   // 오프닝이 끝나면 첫 화면 팝업 (하루 한 번)
 /* 첫 화면 팝업 (관리자설정 > 기본정보 · 예전 입구 화면을 대신함): 사진(photos/web/1.jpg, 2.jpg …) + 문구 */
 let HPOP=0, HPT=0, HPI=0;
 const hpKey=()=>'ntHome|'+today;
-function homePopMaybe(force){ if(!PUB) return; const H=PUB.home||{on:true}; if(!force&&(H.on===false||isEnd())) return; if(HPOP) return;   // 설정 전에도 기본 문구로 켜짐
+function homePopMaybe(force){ if(!PUB) return; if(!force&&/^[A-Z0-9]{4}$/.test(QS.get('mc')||'')) return;   // 수강신청·체력측정을 마치고 넘어온 경우는 팝업 없이
+  const H=PUB.home||{on:true}; if(!force&&(H.on===false||isEnd())) return; if(HPOP) return;   // 설정 전에도 기본 문구로 켜짐
   if(!force){ try{ if(localStorage.getItem(hpKey())) return; }catch(e){} }
   HPOP=1; const t=H.title||'증평체력인증센터', m=H.msg||'증평체력인증센터입니다.\n저희와 함께 체력을 지켜요~';
   const d=document.createElement('div'); d.className='hpop'; d.id='hpop'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
@@ -2245,5 +2247,12 @@ window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endM
   homePopClose(); draw(); if(scr==='home') homePopMaybe(true);
   const K={}; if(scr==='home'){ K['home.title']=(PUB.home&&PUB.home.title)||'증평체력인증센터'; K['home.msg']=(PUB.home&&PUB.home.msg)||'증평체력인증센터입니다.'; }
   else { K.endTitle=PUB.endTitle||'이번 수업이 모두 끝났어요'; K.endMsg=PUB.endMsg||'다음 수강신청 일정은'; } window.__pvDeco(K); };</script>
+<style id="kpfix">
+/* 비밀번호 숫자판: 숫자를 칸 한가운데 · 숫자판을 화면 가운데 (점 4개와 같은 축) */
+.pwp .pwp-kp{justify-items:stretch;align-items:stretch;justify-content:center;width:100%;max-width:26rem;margin-left:auto!important;margin-right:auto!important}
+.pwp .pwp-kp button{padding:0!important;line-height:1!important;text-align:center;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+.pwp.full .pwp-kp button{margin:0!important}
+.pwp .pwp-pin,.pwp .pwp-dots{justify-content:center}
+</style>
 </body>
 </html>
