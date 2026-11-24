@@ -2124,6 +2124,11 @@ html.going .gobar{display:block}html.going .gomsg{display:flex}
 .pwp.full .pwp-go{margin-top:.6rem}
 .pwp.full .pwp-ft{justify-content:center;margin-top:.7rem}.pwp.full .pwp-nt{margin:.3rem 0 0}
 </style>
+<style id="pwpcssC">
+/* 비밀번호 정하기: 대제목 한 줄(폭에 맞춰 줄어듦) · 점 위 라벨 */
+.pwp.full .pwp-h b{display:inline-block;white-space:nowrap;letter-spacing:-.02em}
+.pwp .pwp-lb{text-align:center;font-size:1.1em;font-weight:800;color:#2F3A45;margin:0 0 .7rem}
+</style>
 <div class="pwp-ov" id="pwpOv" role="dialog" aria-modal="true" aria-label="비밀번호"><div class="pwp" id="pwpBox"></div></div>
 <script id="pwpjs">
 /* PWP.open({mode:'set'|'new'|'unset'|'reset', name, phone, run(fn,args,ok), onDone(pw), onClose(), err})
@@ -2153,16 +2158,15 @@ window.PWP=(function(){
       var warn='<div class="pwp-wn" role="note"><div class="t"><strong>카드·통장 비밀번호는 쓰지 마세요.</strong><span>쉬운 4자리 숫자로 정해 주세요.</span></div></div>';
       out='<div class="pwp-top"><button type="button" class="pwp-lnk" id="pwpX">‹ 닫기</button></div>'
         +'<div class="pwp-pg"><i class="on"></i><i class="'+(st===2?'on':'')+'"></i><b>'+st+' / 2</b></div>'
-        +'<div class="pwp-h"><b>'+(st===1?'사용할 비밀번호를<br>정해 주세요':'한 번 더<br>입력해 주세요')+'</b></div>'+who
+        +'<div class="pwp-h"><b id="pwpH">'+(st===1?'회원조회·변경·취소 시 필요합니다.':'한 번 더 입력해 주세요')+'</b></div>'+who
         +'<div class="pwp-rows">'
-          +'<div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div>'
-          +(st===2?'<div class="pwp-row" id="pwpRB">'+bx('pwpB')+'</div>':'')
+          +(st===1?'<div class="pwp-lb">비밀번호 설정</div><div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div>'
+                    :'<div class="pwp-lb">비밀번호 확인</div><div class="pwp-row" id="pwpRB">'+bx('pwpB')+'</div>')
         +'</div>'
         +'<button type="button" class="pwp-sh" id="pwpSh">다시 입력</button>'
         +'<div class="pwp-msg" id="pwpE" aria-live="polite"></div>'
         +(st===1?warn:'')
-        +'<div class="pwp-kp" id="pwpK">'+kp+'</div>'
-        +(st===2?'<button type="button" class="pwp-go" id="pwpGo" disabled>'+(BUSY?'저장 중…':'이 번호로 정할게요')+'</button>':'');
+        +'<div class="pwp-kp" id="pwpK">'+kp+'</div>';
     } else {  /* 입력(변경·취소): 전체 화면 · 한 줄 */
       out='<div class="pwp-top"><button type="button" class="pwp-lnk" id="pwpX">‹ 닫기</button></div>'
         +'<div class="pwp-h"><b>비밀번호를<br>입력해 주세요</b></div>'+who
@@ -2176,14 +2180,16 @@ window.PWP=(function(){
     box.innerHTML=out;
     $('pwpK').onclick=function(e){ var b=e.target.closest('button[data-k]'); if(b) press(b.getAttribute('data-k')); };
     $('pwpSh').onclick=function(){ A=''; B=''; MSG=''; MSGOK=false; BADB=false; draw(); };   /* 다시 입력 = 처음(1단계)부터 */
-    if($('pwpGo')) $('pwpGo').onclick=go; $('pwpX').onclick=function(){ close(true); };
+    $('pwpX').onclick=function(){ close(true); };
     if($('pwpRq')) $('pwpRq').onclick=reqReset;
-    upd();
+    upd(); fitH();
   }
+  function fitH(){ var b=$('pwpH'); if(!b) return; b.style.fontSize=''; var w=b.parentElement.clientWidth; if(!w) return; var m=parseFloat(getComputedStyle(b).fontSize), sw=b.scrollWidth; if(sw>w) b.style.fontSize=(Math.floor(m*w/sw*10)/10-.2)+'px'; }
+  addEventListener('resize',function(){ if(O) fitH(); });
   function cells(id,v,cur){ var c=$(id); if(!c) return; var is=c.children; for(var i=0;i<4;i++){ is[i].textContent=i<v.length?(SH?v.charAt(i):'●'):''; is[i].className=cur&&i===v.length?'nx':''; } }
   function press(k){
     if(BUSY||!O) return; var t=two();
-    if(k==='del'){ if(t&&A.length===4&&B.length){ B=B.slice(0,-1); } else if(t&&A.length===4&&!B.length){ A=A.slice(0,-1); } else A=A.slice(0,-1); MSG=''; BADB=false; return upd(); }
+    if(k==='del'){ if(t&&A.length===4){ B=B.slice(0,-1); } else A=A.slice(0,-1); MSG=''; BADB=false; return upd(); }
     if(!/^\d$/.test(k)) return; MSG=''; BADB=false;
     if(A.length<4){ A+=k; upd(); if(A.length===4){ if(t){ window.vo&&vo('한 번 더 입력하세요.'); } else setTimeout(function(){ if(O&&A.length===4&&!BUSY) go(); },250); } return; }   // 입력(조회·예약): 4자리면 확인 버튼 없이 바로
     if(t&&B.length<4){ B+=k; upd();
@@ -2195,23 +2201,23 @@ window.PWP=(function(){
     if(two()&&STEP!==(A.length===4?2:1)){ draw(); return; }
     var t=two(), aDone=A.length===4, same=t&&B.length===4&&A===B;
     cells('pwpA',A,!aDone); if(t) cells('pwpB',B,aDone&&!same);
-    var ra=$('pwpRA'); ra.className='pwp-row'+(aDone?' ok':' cur');
+    var ra=$('pwpRA'); if(ra) ra.className='pwp-row'+(aDone?' ok':' cur');
     if(t&&$('pwpRB')){ var rb=$('pwpRB'); rb.className='pwp-row'+(!aDone?' wait':BADB?' bad':same?' ok':' cur'); }
     var e=$('pwpE'), msg=MSG, cls=MSGOK?'good':(MSG?'bad':'');
+    if(!msg&&BUSY){ msg='저장 중…'; cls=''; }
     if(!msg&&t&&same){ msg='✓ 두 번 같게 입력하셨어요'; cls='good'; }
     else if(!msg&&t&&aDone&&!B.length&&!guide()){ msg='같은 숫자를 한 번 더 눌러 주세요'; cls=''; }
     e.textContent=msg; e.className='pwp-msg'+(cls?' '+cls:'');
-    if($('pwpGo')){ $('pwpGo').disabled=!same||BUSY; $('pwpGo').textContent=BUSY?'저장 중…':'이 번호로 정할게요'; }
   }
-  function key(e){ if(!O) return; if(/^\d$/.test(e.key)){ e.preventDefault(); press(e.key); } else if(e.key==='Backspace'){ e.preventDefault(); press('del'); } else if(e.key==='Enter'&&$('pwpGo')&&!$('pwpGo').disabled){ e.preventDefault(); go(); } else if(e.key==='Escape'){ close(true); } }
+  function key(e){ if(!O) return; if(/^\d$/.test(e.key)){ e.preventDefault(); press(e.key); } else if(e.key==='Backspace'){ e.preventDefault(); press('del'); } else if(e.key==='Escape'){ close(true); } }
   document.addEventListener('keydown',key);
   function go(){
     if(BUSY) return; var m=O.mode, pw=A;
     if(m==='set'||m==='new'){ var f=O.onDone; close(false); f&&f(pw); return; }
     BUSY=true; upd();
     O.run('pwSetup',[O.name,O.phone,pw],function(r){ BUSY=false;
-      if(!r||!r.ok){ if(r&&r.code==='SET'){ O.mode='set'; A=''; B=''; } MSG=(r&&r.msg)||'저장하지 못했어요. 잠시 후 다시 눌러 주세요.'; MSGOK=false; return draw(); }
-      MSG=r.msg||'비밀번호를 정했어요.'; MSGOK=true; upd(); if($('pwpGo')) $('pwpGo').disabled=true;
+      if(!r||!r.ok){ if(r&&r.code==='SET'){ O.mode='set'; A=''; } B=''; MSG=(r&&r.msg)||'저장하지 못했어요. 확인 번호를 다시 입력해 주세요.'; MSGOK=false; return draw(); }
+      MSG=r.msg||'비밀번호를 정했어요.'; MSGOK=true; upd();
       var f=O.onDone; setTimeout(function(){ close(false); f&&f(pw); },1100); });
   }
   function reqReset(){   // v5: 재설정 요청(승인) 폐지 → 센터 전화. 센터가 관리자 앱에서 초기화하면 다시 정할 수 있어요
@@ -2220,8 +2226,8 @@ window.PWP=(function(){
     MSG='비밀번호는 센터에서 초기화해 드려요.\n센터로 전화해 주세요.'; MSGOK=false; upd();
   }
   function close(user){ $('pwpOv').classList.remove('on'); var c=O&&O.onClose; O=null; if(user&&c) c(); }
-  return { open:function(o){ O=o; A=''; B=''; SH=false; BUSY=false; BADB=false; MSG=o.err||''; MSGOK=false; draw(); $('pwpOv').classList.add('on'); try{ document.activeElement&&document.activeElement.blur(); }catch(e){}
-             if(window.vo){ voReset(); vo(two()?'카드, 통장 비밀번호는 절대 사용하지 마세요. 쉬운 4자리로 설정하세요.':'비밀번호 4자리를 눌러 주세요.'); } },
+  return { open:function(o){ O=o; A=''; B=''; SH=false; BUSY=false; BADB=false; MSG=o.err||''; MSGOK=false; draw(); $('pwpOv').classList.add('on'); fitH(); try{ document.activeElement&&document.activeElement.blur(); }catch(e){}
+             if(window.vo){ voReset(); vo(two()?'사용할 비밀번호를 정해 주세요.':'비밀번호 4자리를 눌러 주세요.'); } },
            close:function(){ if(O) close(false); }, isOpen:function(){ return !!O; } };
 })();
 </script>
