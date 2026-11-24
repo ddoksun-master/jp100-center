@@ -5,6 +5,12 @@
       { "key": "Referrer-Policy", "value": "no-referrer" },
       { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
       { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self' https://script.google.com https://*.googleusercontent.com" }
+    ] },
+    { "source": "/", "headers": [
+      { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+    ] },
+    { "source": "/(.*)\\.html", "headers": [
+      { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
     ] }
   ]
 }
