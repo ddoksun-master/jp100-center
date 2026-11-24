@@ -5,6 +5,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <meta name="apple-mobile-web-app-title" content="JP100">
 
 <meta charset="utf-8">
@@ -1245,6 +1246,7 @@ html[data-mode] .lkh{font-size:var(--t3)}
 .wk b em.ce{overflow:visible!important}.wk b em.ce span{display:block;transform:translateX(-50%)}
 .v7cal .wk{border:0;border-radius:0;background:transparent;gap:0;overflow:visible}.v7cal .wk i{background:transparent;color:var(--sub)}.v7cal .wk i.s,.v7cal .wk i.t{color:#d32f2f}.v7cal .wk b{background:transparent}.v7cal .wk b.sel{border-radius:.6rem}
 .v7pad{padding:1.5rem 1.1rem 1rem;display:flex;flex-direction:column;gap:1.2rem;background:var(--face);min-height:calc(100dvh - 56px - 7.5rem);box-sizing:border-box}
+.v7plan{display:flex;flex-direction:column;border-top:1px solid #dfe5ec;text-align:left}.v7plan>div{display:flex;flex-wrap:wrap;gap:.15rem .7rem;align-items:baseline;padding:.75rem .2rem;border-bottom:1px solid #dfe5ec}.v7plan b{font-size:1.15rem;font-weight:800}.v7plan span{font-size:1.05rem;font-weight:700;color:var(--navy)}.v7nx>small{display:block;font-size:.9rem;font-weight:700;color:var(--sub);margin:.1rem 0 .25rem}
 .v7hd{display:flex;flex-direction:column;gap:.35rem}.v7hd>b{font-size:1.65rem;font-weight:800;line-height:1.3;word-break:keep-all}
 .v7hd>span{font-size:.95rem;font-weight:500;color:var(--sub);line-height:1.5}
 .v7hl{display:flex;align-items:center;flex-wrap:wrap;gap:.3rem .6rem}.v7hn{font-size:1.65rem;font-weight:800;line-height:1.3;color:var(--ink)}.v7hn em,.v7cd{font-style:normal;color:var(--navy);letter-spacing:.08em}
@@ -1321,7 +1323,11 @@ const F=(m,e)=>'<span class="fing" aria-hidden="true">'+(e||'👆')+'</span>'+m;
 const gb=(t,fn,m)=>'<button class="gb" onclick="'+fn+'"><b>'+t+'</b><i class="gonly">'+F(m||'눌러 주세요')+'</i></button>';
 const SV='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
 const NFA='https://nfa.kspo.or.kr/member/login/memberLogin.kspo?returnUrl=/beforeReserve.kspo';
-function goUrl(u){ if(!u) return; const a=document.createElement('a'); a.href=u; a.target=IN_GAS?'_top':'_self'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); }
+let GOING=0;
+function going(on){ const R=document.documentElement; if(on){ if(!document.getElementById('gobar')) document.body.insertAdjacentHTML('beforeend','<div class="gobar" id="gobar"><i></i></div><div class="gomsg" id="gomsg" role="status"><s></s>이동 중이에요…</div>'); R.classList.add('going'); } else R.classList.remove('going'); }
+addEventListener('pageshow',()=>{ GOING=0; going(false); });   // 뒤로가기로 돌아오면 표시 지움
+function goUrl(u){ if(!u) return; if(/^https?:|^[a-z]+\.html|^\?/i.test(u)){ if(GOING) return; GOING=1; going(true); setTimeout(()=>{ GOING=0; going(false); },15000); }   // 누르는 즉시 '이동 중' · 두 번 눌러도 한 번만
+  const a=document.createElement('a'); a.href=u; a.target=IN_GAS?'_top':'_self'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); }
 function openInChrome(url){
   if(window.__HARNESS){ try{ parent.postMessage({extOpen:url},'*'); }catch(e){} return; }   // 미리보기: 이동 경로를 그림으로
   // v4: 구글 웹앱은 틀(iframe) 안에서 열려서, 크롬이 intent://·googlechromes:// 같은 특수 주소 이동을 소리 없이 막음
@@ -1437,7 +1443,7 @@ const MOCK={
    getNotice() → {name,today,classStart,classEnd,tel,signupOpen,signupUrl,fitUrl,fit:{start,end,closed,open,close},items:[{d,e,k,t,c}]}
    lookupAll(이름,전화(숫자),비밀번호) → {ok,found,cls:{label,status:'wait|ok|hold|cxl',req:'|pend-chg|pend-cnl|cnl-done',title,msg(상태표 문구),why(취소 사유),last:{result:'승인'|'반려',type,at}},fit:{status:'booked|done|ended|cancelled|none',date,time,last}}
    memberAct(이름,전화,비밀번호,'cls'|'fit','chg'|'cnl',direct) → {ok,msg}   direct=false 면 관리자 승인 요청으로 저장 */
-let LKC='',LKNOPW=false,PUB=null,today='',NV='m',SELD='',MORE=false,SHEET=0,LKR=0,LK=null,ACT=null,PWS=false,BUSY=0,LKERR='',LI={nm:'',ph:'',pw:''};
+let LKC='',LKNOPW=false,PUB=null,today='',NV='w',SELD='',MORE=false,SHEET=0,LKR=0,LK=null,ACT=null,PWS=false,BUSY=0,LKERR='',LI={nm:'',ph:'',pw:''};
 const EVC={'휴강':'ev4','휴관':'ev1','행사':'ev2','공지':'ev3'};
 // v3: 일정 제목이 수강신청(수강신청)·체력측정이면 따로 색 (관리자 앱 일정과 같은 규칙)
 const evKind=e=>/체력\s*(측정|검사)/.test(e.t||'')?'체력측정':/사전\s*접수|수강\s*신청/.test(e.t||'')?'수강신청':e.k;
@@ -1495,9 +1501,17 @@ function evCard(s,e,showDate,tOnly){ return '<div class="ecard e4 '+evCls(e).spl
 const mdI=k=>(+k.slice(5,7))+'/'+(+k.slice(8,10));
 const hmI=hm=>{ const h=+hm.slice(0,2), m=hm.slice(3,5); return (h<12?'오전 ':'오후 ')+pad(((h+11)%12)+1)+':'+m; };
 const dDiff=k=>Math.round((P(k.slice(0,10))-P(today))/86400000);
+// 반별 오픈: 서버가 보내 준 반마다 열리는 시각 (반별 설정을 켠 반 = 자기 시각, 아니면 전체 시각)
+const wdK=s=>'일월화수목금토'.charAt(P(s.slice(0,10)).getDay());
+const whenK=s=>(dDiff(s)===0?'오늘':mdK(s)+'('+wdK(s)+')')+' '+hmI(s.slice(11,16));
+const whenI=s=>(dDiff(s)===0?'오늘':mdI(s))+' '+hmI(s.slice(11,16));
+function clsPlan(){ const S=PUB&&PUB.signup; if(!S||!S.per||!S.cls) return []; const n=nowKey(); return S.cls.filter(c=>c.phase==='before'&&c.start&&n<c.start).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:0); }
+function planHtml(p){ return '<div class="v7plan">'+p.map(c=>'<div><b>'+whenK(c.start)+'</b><span>'+esc(c.id)+' 오픈예정</span></div>').join('')+'</div>'; }
 // 기간 전 바로가기 상태: 수강신청 = 'D-5 (12/1 접수시작)' · 체력측정 예약 = '(12/4 오전09:00)' / 닫힘·끝남 = 안 보임
-function clsSoon(){ const S=PUB&&PUB.signup; if(!S||S.per||S.mode!=='auto'||!S.start) return ''; const n=nowKey(); if(n>=S.start) return ''; const d=dDiff(S.start);
-  return d>0?mdI(S.start)+' 접수시작 (D-'+d+')':'오늘 '+hmI(S.start.slice(11,16))+' 접수시작'; }
+function clsSoon(){ const S=PUB&&PUB.signup; if(!S) return '';
+  if(S.per){ const p=clsPlan(); if(!p.length) return ''; const s=p[0].start; return whenI(s)+' '+p.filter(c=>c.start===s).map(c=>c.id).join('·')+' 오픈예정'; }   // 반별: 가장 먼저 열리는 반
+  if(S.mode!=='auto'||!S.start) return ''; const n=nowKey(); if(n>=S.start) return ''; const d=dDiff(S.start);
+  return d>0?mdI(S.start)+' '+hmI(S.start.slice(11,16))+' 접수시작 (D-'+d+')':'오늘 '+hmI(S.start.slice(11,16))+' 접수시작'; }
 function fitSoon(){ if(PUB&&PUB.fitOn===false) return ''; const F=fcfg(); if(!F.start||!F.end||!F.open||today>F.end) return ''; const n=nowKey(); if(n>=F.open) return ''; return mdI(F.open)+' ('+hmI(F.open.slice(11,16))+')'; }
 function entries(){
   const a=clsOn(), b=fitOn(), as=a?'':clsSoon(), bs=b?'':fitSoon(), two=(a||as)&&(b||bs); let ent='';
@@ -1540,7 +1554,8 @@ function calHtml(){
   const a0=iso(wkStart()), a6=iso(addD(wkStart(),13)), d0=mAnc();
   const range=w?dshI(a0).replace(/\(.\)/,'')+' ~ '+dshI(a6).replace(/\(.\)/,''):d0.getFullYear()+'년 '+(d0.getMonth()+1)+'월';
   const alw='';
-  return '<div class="nsec"><div class="nh"><span class="nr"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button><small>'+range+'</small><button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+'</span>'+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
+  const tg='<div class="v7tg"><button type="button" class="'+(w?'on':'')+'" onclick="setNV(\'w\')">2주</button><button type="button" class="'+(w?'':'on')+'" onclick="setNV(\'m\')">월간</button></div>';
+  return '<div class="nsec">'+tg+'<div class="nh"><span class="nr"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button><small>'+range+'</small><button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+'</span>'+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
    +(w?calWeek():calMonth())+dh+list+'</div>';
 }
 /* v7 화면은 아래 '신청·조회 개편' 블록에서 그림 */
@@ -1609,6 +1624,7 @@ function endView(){
 function sigPhase(){   // open 신청 중 · before 신청 시작 전 · closed 신청 마감(수업 진행 중) · none 그 밖
   if(clsOn()) return 'open';
   const S=PUB.signup||{}, n=nowKey();
+  if(S.per&&S.cls&&S.cls.length){ if(S.cls.some(c=>c.phase==='before')) return 'before'; if(S.cls.every(c=>c.phase==='after'||c.phase==='closed')) return 'closed'; }   // 반별: 아직 안 열린 반이 있으면 '시작 전'
   if(!S.per&&S.start&&n<S.start) return 'before';
   if(!S.per&&S.end&&n>S.end) return 'closed';
   return PUB.classStart&&today>=PUB.classStart?'closed':'none';
@@ -1621,12 +1637,16 @@ function closedView(){
 function beforeView(){
   const S=PUB.signup||{}, ph=sigPhase();
   if(ph==='closed') return closedView();
+  const p=clsPlan();
+  if(ph==='before'&&p.length) return '<div class="v7pad"><div class="v7hd"><b>반별로 신청이 열려요</b><span>열리는 시각부터 신청할 수 있어요.</span></div>'+planHtml(p)+'</div>';
   const st=ph==='before'?S.start:'';
-  return '<div class="v7mid"><b class="e0">'+(st?ymdK(st)+'<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
+  return '<div class="v7mid"><b class="e0">'+(st?ymdK(st)+'<br>'+hmI(st.slice(11,16))+'부터<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
 }
 function newView(){
   const cs=PUB.classStart&&today<PUB.classStart?mdK(PUB.classStart)+' 수업이 시작돼요.':'신청하면 회원으로 자동 저장돼요.';
+  const p=clsPlan();
   return '<div class="v7pad"><div class="v7hd"><b>수강 신청을 받고 있어요</b><span>'+cs+'</span></div>'
+   +(p.length?'<div class="v7nx"><small>곧 열리는 반</small>'+planHtml(p)+'</div>':'')
    +'<div class="v7c1"><div><b>수강 신청</b><span>이름과 전화번호로 신청해요.</span></div><button type="button" class="v7big" onclick="goUrl(signupUrl())">신청하기</button></div>'
    +'<div class="v7c2"><b>수강신청을 완료하셨나요?</b><button type="button" class="v7ulk in" onclick="startReg()">회원 등록</button></div></div>';
 }
@@ -1812,9 +1832,24 @@ function init(pub){
   const hs=$('hsub'); if(hs) hs.textContent='수업일정';
   TAB=(QS.get('lk')==='1'||QS.get('go')==='lookup'||isEnd()||(!(PUB.classStart&&today>=PUB.classStart)&&!mcGet()&&clsOn()))?'apply':'home';   // 첫 화면: 수업 중 = 일정 · 종료 후 = 신청·조회 · 수업 전 = 신청 열려 있으면 신청·조회
   ONK=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon();
-  draw(); if(TAB==='apply') applyEnter(); opData=true; opTry();
+  draw(); if(TAB==='apply') applyEnter(); opData=true; opTry(); if(opDone) setTimeout(()=>homePopMaybe(),300);   // 가림막 없이 바로 뜬 경우(재방문)
 }
-window.onOpened=function(){};   // 31~34: 오프닝이 끝난 뒤 진행 중인 접수 안내 팝업 (하루 1번)
+window.onOpened=function(){ homePopMaybe(); };   // 오프닝이 끝나면 첫 화면 팝업 (하루 한 번)
+/* 첫 화면 팝업 (관리자설정 > 기본정보 · 예전 입구 화면을 대신함): 사진(photos/web/1.jpg, 2.jpg …) + 문구 */
+let HPOP=0, HPT=0, HPI=0;
+const hpKey=()=>'ntHome|'+today;
+function homePopMaybe(force){ if(!PUB) return; const H=PUB.home||{on:true}; if(!force&&(H.on===false||isEnd())) return; if(HPOP) return;   // 설정 전에도 기본 문구로 켜짐
+  if(!force){ try{ if(localStorage.getItem(hpKey())) return; }catch(e){} }
+  HPOP=1; const t=H.title||'증평체력인증센터', m=H.msg||'증평체력인증센터입니다.\n저희와 함께 체력을 지켜요~';
+  const d=document.createElement('div'); d.className='hpop'; d.id='hpop'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
+  d.innerHTML='<div class="hpb"><h2 class="hpt">'+esc(t)+'</h2><div class="hps" id="hps" hidden><div class="trk" id="hptrk"></div><div class="dots" id="hpdots"></div></div><p class="hpm">'+esc(m)+'</p><button type="button" class="hpok" onclick="homePopClose()">확인</button></div>';
+  document.body.appendChild(d); if(MODE==='web') hpLoad(1); }
+function hpLoad(n){ if(n>30||!HPOP) return; const src='photos/web/'+n+'.jpg', im=new Image();   // 번호 사진을 차례로 · 없는 번호에서 멈춤
+  im.onload=()=>{ const tr=$('hptrk'); if(!tr) return; $('hps').hidden=false; tr.appendChild(Object.assign(document.createElement('img'),{src,alt:'센터 사진 '+n}));
+    $('hpdots').insertAdjacentHTML('beforeend','<i'+(n===1?' class="on"':'')+'></i>'); if(n===2) HPT=setInterval(hpNext,3500); hpLoad(n+1); };
+  im.src=src; }
+function hpNext(){ const tr=$('hptrk'); if(!tr) return clearInterval(HPT); const k=tr.children.length; if(k<2) return; HPI=(HPI+1)%k; tr.style.transform='translateX(-'+(HPI*100)+'%)'; [...$('hpdots').children].forEach((x,i)=>x.classList.toggle('on',i===HPI)); }
+function homePopClose(){ HPOP=0; clearInterval(HPT); HPI=0; const d=$('hpop'); if(d) d.remove(); if(!window.__PV){ try{ localStorage.setItem(hpKey(),'1'); }catch(e){} } }
 document.documentElement.dataset.mode='solo'; document.documentElement.dataset.theme='notice';
 /* 일정공지 불러오기: GitHub Pages(web)에서는 마지막 응답을 폰에 저장해 먼저 보여 주고, 뒤에서 새로 받아 달라졌을 때만 다시 그림 */
 const PUB_K='nt_pub_v1'; try{ localStorage.removeItem('nt_pub'); }catch(e){}
@@ -2019,6 +2054,45 @@ html[data-mode=guide] .pwp .pwp-row.ok .pwp-bx i{background:#EAF7EF;border-color
 html[data-mode=guide] .pwp .pwp-bx i{background:transparent;border-color:#9DB0C3}
 html[data-mode=guide] .pwp .pwp-bx i:not(:empty){background:#00457f;border-color:#00457f}
 </style>
+<style id="v7grid">
+/* v11 달력 = 2주|월간 밑줄 탭(B) + 뚜렷한 격자(C) */
+.v7tg{display:flex;gap:1.5rem;padding:0 .3rem;margin:.2rem 0 .1rem}
+.v7tg button{border:0;background:none;font:inherit;font-size:1.3em;font-weight:800;color:#9AA9B8;padding:.3rem 0 .45rem;border-bottom:3px solid transparent;cursor:pointer}
+.v7tg button.on{color:#00457f;border-bottom-color:#00457f}
+.v7cal .wk{gap:1px;background:#B9C6D3;border:1.5px solid #B9C6D3;border-radius:.7rem;overflow:hidden;text-align:left}
+.v7cal .wk i{background:#fff;color:#5b7189;text-align:center;padding:.5rem 0;box-shadow:inset 0 -2px 0 #00457f}
+.v7cal .wk i.s{color:#d32f2f}.v7cal .wk i.t{color:#1565c0}
+.v7cal .wk b{background:#fff;min-height:6.3rem;padding:.3rem 0 .2rem;text-align:left;font-size:1.05em;font-weight:700}
+.v7cal .wk b.m{min-height:4.5rem}
+.v7cal .wk b.e{background:#F3F7FB}
+.v7cal .wk b>span{display:inline-flex;align-items:center;justify-content:center;min-width:1.9rem;height:1.9rem;margin-left:.3rem;border-radius:50%;padding:0}
+.v7cal .wk b.td>span{background:#00457f;color:#fff;border-radius:50%;padding:0}
+.v7cal .wk b,.v7cal .wk b.sel{border-radius:0}
+.v7cal .wk b.sel{background:#E6F2FB;box-shadow:none}
+.v7cal .wk b em{text-align:center}
+.v7cal .wk b em{margin:.2rem 0 0;border-radius:.2rem;font-size:.78rem}
+.v7cal .wk b.m em{font-size:.62rem;margin:.12rem 0 0}
+</style>
+<style id="hpopcss">
+/* 첫 화면 팝업 (관리자설정 > 기본정보): 사진 슬라이드 + 문구 · 하루 한 번 */
+.hpop{position:fixed;inset:0;z-index:85;background:rgba(20,32,44,.55);display:flex;align-items:center;justify-content:center;padding:1.2rem}
+.hpop .hpb{width:100%;max-width:26rem;max-height:calc(100dvh - 2.4rem);overflow:auto;background:#fff;border-radius:18px;padding:1.2rem 1rem 1rem;box-shadow:0 12px 32px rgba(0,0,0,.28);text-align:center}
+.hpop .hpt{font-size:var(--t2);font-weight:900;color:var(--navy);line-height:1.3;margin:0 0 .8rem;word-break:keep-all}
+.hpop .hps{position:relative;height:min(14rem,32vh);border-radius:12px;overflow:hidden;background:var(--sky)}
+.hpop .hps .trk{display:flex;height:100%;transition:transform .6s ease}
+.hpop .hps img{flex:none;width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block}
+.hpop .hps .dots{position:absolute;left:0;right:0;bottom:.5rem;display:flex;justify-content:center;gap:.4rem}
+.hpop .hps .dots i{width:.5rem;height:.5rem;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 0 .2rem rgba(0,0,0,.45)}.hpop .hps .dots i.on{background:#fff}
+.hpop .hpm{margin:.9rem 0 1rem;font-size:var(--t3);font-weight:700;line-height:1.6;color:var(--ink);white-space:pre-line;word-break:keep-all}
+.hpop .hpok{display:block;width:100%;min-height:3.2rem;border:0;border-radius:12px;background:var(--navy);color:#fff;font:inherit;font-size:var(--t3);font-weight:800;cursor:pointer}
+/* 화면 이동 중 표시: 누르는 즉시 위쪽 진행 막대 + 안내 (다음 화면이 뜰 때까지) */
+.gobar{position:fixed;left:0;top:0;right:0;height:4px;z-index:200;background:rgba(0,69,127,.15);overflow:hidden;display:none}
+.gobar i{position:absolute;top:0;bottom:0;width:40%;background:#F89828;animation:gob 1.1s ease-in-out infinite}
+@keyframes gob{from{left:-40%}to{left:100%}}
+.gomsg{position:fixed;left:50%;bottom:6.2rem;transform:translateX(-50%);z-index:200;display:none;align-items:center;gap:.6rem;padding:.8rem 1.3rem;border-radius:99px;background:#00457f;color:#fff;font-size:var(--t3);font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.25);white-space:nowrap}
+.gomsg s{width:1.1rem;height:1.1rem;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .8s linear infinite}
+html.going .gobar{display:block}html.going .gomsg{display:flex}
+</style>
 <style id="pwpcssB">
 /* v10 처음 정하기·재설정 = 전체 화면: 1단계 한 줄 → 2단계 두 줄 */
 .pwp.full{max-width:none;width:100%;height:100%;max-height:none;border-radius:0;background:#F3F7FB;padding:.6rem 1.3rem calc(1.1rem + env(safe-area-inset-bottom));display:flex;flex-direction:column;animation:none;box-shadow:none}
@@ -2036,7 +2110,9 @@ html[data-mode=guide] .pwp .pwp-bx i:not(:empty){background:#00457f;border-color
 .pwp.full .pwp-sh{margin:.6rem auto 0}
 .pwp.full .pwp-wn{margin:.3rem 0 0;padding:.6rem .8rem;border-radius:.8rem;background:#FFF6E8;border:1px solid #F3D7A8;display:block;text-align:center}
 .pwp.full .pwp-wn .t{padding:0;border:0}.pwp.full .pwp-wn strong{font-size:1em;color:#8A4B00}.pwp.full .pwp-wn span{font-size:.9em;font-weight:600;color:#6B5A3E}.pwp.full .pwp-wn span.ap{color:#9A4A00;font-weight:800}
-.pwp.full .pwp-kp{flex:1 1 auto;min-height:0;margin:.8rem 0 0;padding:0;grid-template-rows:repeat(4,minmax(3.6rem,5.4rem));gap:.6rem .6rem;align-content:end}
+.pwp.full{overflow-y:auto}
+.pwp.full .pwp-kp{flex:1 1 0;min-height:calc(4 * 2.9rem + 1.8rem);max-height:calc(4 * 5.4rem + 1.8rem);margin:auto 0 0;padding-top:.8rem;grid-template-rows:repeat(4,minmax(2.9rem,1fr));gap:.6rem .6rem}   /* 높이가 모자라면 위 글을 덮지 않고 아래로 (구글 화면 위 안내 띠가 있어도) */
+@media (max-height:700px){.pwp.full .pwp-top{height:2.1rem}.pwp.full .pwp-pg{margin:.1rem 0 .5rem}.pwp.full .pwp-h b{font-size:1.4em}.pwp.full .pwp-who{margin:.3rem 0 .4rem}.pwp.full .pwp-rows{margin:.6rem 0 0;gap:.8rem}.pwp.full .pwp-wn{padding:.4rem .6rem}.pwp.full .pwp-kp{margin-top:.5rem;gap:.45rem}}
 .pwp.full .pwp-kp button{width:100%;height:100%;border-radius:1.2rem;background:#fff;font-size:2.1em;font-weight:600}
 .pwp.full .pwp-kp button svg{width:1.2em;height:1.2em}
 .pwp.full .pwp-go{margin-top:.6rem}
@@ -2076,7 +2152,7 @@ window.PWP=(function(){
           +'<div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div>'
           +(st===2?'<div class="pwp-row" id="pwpRB">'+bx('pwpB')+'</div>':'')
         +'</div>'
-        +'<button type="button" class="pwp-sh" id="pwpSh">'+(SH?'숫자 가리기':'숫자 보기')+'</button>'
+        +'<button type="button" class="pwp-sh" id="pwpSh">다시 입력</button>'
         +'<div class="pwp-msg" id="pwpE" aria-live="polite"></div>'
         +(st===1?warn:'')
         +'<div class="pwp-kp" id="pwpK">'+kp+'</div>'
@@ -2085,7 +2161,7 @@ window.PWP=(function(){
       out='<div class="pwp-top"><button type="button" class="pwp-lnk" id="pwpX">‹ 닫기</button></div>'
         +'<div class="pwp-h"><b>비밀번호를<br>입력해 주세요</b></div>'+who
         +'<div class="pwp-rows"><div class="pwp-row" id="pwpRA">'+bx('pwpA')+'</div></div>'
-        +'<button type="button" class="pwp-sh" id="pwpSh">'+(SH?'숫자 가리기':'숫자 보기')+'</button>'
+        +'<button type="button" class="pwp-sh" id="pwpSh">다시 입력</button>'
         +'<p class="pwp-nt">수강신청 때 정한 숫자 4자리를 눌러 주세요.</p>'
         +'<div class="pwp-msg" id="pwpE" aria-live="polite"></div>'
         +'<div class="pwp-kp" id="pwpK">'+kp+'</div>'
@@ -2093,7 +2169,7 @@ window.PWP=(function(){
     }
     box.innerHTML=out;
     $('pwpK').onclick=function(e){ var b=e.target.closest('button[data-k]'); if(b) press(b.getAttribute('data-k')); };
-    $('pwpSh').onclick=function(){ SH=!SH; this.textContent=SH?'숫자 가리기':'숫자 보기'; $('pwpBox').classList.toggle('sh',SH); upd(); };
+    $('pwpSh').onclick=function(){ A=''; B=''; MSG=''; MSGOK=false; BADB=false; draw(); };   /* 다시 입력 = 처음(1단계)부터 */
     if($('pwpGo')) $('pwpGo').onclick=go; $('pwpX').onclick=function(){ close(true); };
     if($('pwpRq')) $('pwpRq').onclick=reqReset;
     upd();
@@ -2106,7 +2182,7 @@ window.PWP=(function(){
     if(A.length<4){ A+=k; upd(); if(A.length===4){ if(t){ window.vo&&vo('한 번 더 입력하세요.'); } else setTimeout(function(){ if(O&&A.length===4&&!BUSY) go(); },250); } return; }   // 입력(조회·예약): 4자리면 확인 버튼 없이 바로
     if(t&&B.length<4){ B+=k; upd();
       if(B.length===4){ if(A!==B){ MSG='두 숫자가 달라요. 다시 입력해 주세요.'; BADB=true; upd(); setTimeout(function(){ if(O&&BADB){ B=''; BADB=false; upd(); } },900); }
-        else if(guide()) setTimeout(function(){ if(O&&B===A&&!BUSY) go(); },450); } }   // 어르신: 두 번 같으면 자동 · 표준: 버튼
+        else setTimeout(function(){ if(O&&B===A&&!BUSY) go(); },450); }   /* 두 번 같으면 자동으로 넘어감 (어르신·표준 모두) */ }   // 어르신: 두 번 같으면 자동 · 표준: 버튼
   }
   function upd(){
     $('pwpBox').classList.toggle('sh',SH);
@@ -2164,7 +2240,10 @@ window.PWP=(function(){
 </script>
 <script>
 window.__pvReady=()=>!!PUB;
-window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0; draw();
-  const K={}; K.endTitle=PUB.endTitle||'이번 수업이 모두 끝났어요'; K.endMsg=PUB.endMsg||'다음 수강신청 일정은'; window.__pvDeco(K); };</script>
+window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0;
+  if(v['home.title']!=null||v['home.msg']!=null) PUB.home=Object.assign({},PUB.home||{},{title:v['home.title']||'',msg:v['home.msg']||''});
+  homePopClose(); draw(); if(scr==='home') homePopMaybe(true);
+  const K={}; if(scr==='home'){ K['home.title']=(PUB.home&&PUB.home.title)||'증평체력인증센터'; K['home.msg']=(PUB.home&&PUB.home.msg)||'증평체력인증센터입니다.'; }
+  else { K.endTitle=PUB.endTitle||'이번 수업이 모두 끝났어요'; K.endMsg=PUB.endMsg||'다음 수강신청 일정은'; } window.__pvDeco(K); };</script>
 </body>
 </html>
