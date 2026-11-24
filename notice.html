@@ -1305,7 +1305,7 @@ html[data-mode] .lkh{font-size:var(--t3)}
 <div class="wdim" id="wel"><div class="wbox" id="welBox"></div></div>
 <script>
 const $=id=>document.getElementById(id);
-const API_URL='https://script.google.com/macros/s/AKfycbxM35BNwTKcV6675EaaScVbBs_9oQw5LVAfGmfCjdVL8K8zhdsuRkmVEDpZ0bvjxds8/exec';   // ★ GitHub Pages 에 올릴 때: 웹 앱 주소(/exec) 한 줄. 공개 주소라 비밀 아님 (관리자 PIN 은 이 화면에 없음)
+const API_URL='https://script.google.com/macros/s/AKfycbw7A8I1IsQU0wOygH5IQ9gOpiNBvlq4LrzWoXdVc7sWru0QBD8wYKYtbt6SD6STxdi-/exec';   // ★ GitHub Pages 에 올릴 때: 웹 앱 주소(/exec) 한 줄. 공개 주소라 비밀 아님 (관리자 PIN 은 이 화면에 없음)
 const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
 const MODE=IN_GAS?'gas':(API_URL?'web':'mock');   // gas = 구글 웹 앱 안(google.script.run) / web = GitHub Pages(fetch) / mock = 미리보기 데이터
 const LIVE=MODE!=='mock';
@@ -1835,6 +1835,7 @@ function init(pub){
   ONK=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon();
   draw(); if(TAB==='apply') applyEnter(); opData=true; opTry(); if(opDone&&!MCIN) setTimeout(()=>homePopMaybe(),300);   // 가림막 없이 바로 뜬 경우(재방문)
 }
+
 window.onOpened=function(){ homePopMaybe(); };   // 오프닝이 끝나면 첫 화면 팝업 (하루 한 번)
 /* 첫 화면 팝업 (관리자설정 > 기본정보 · 예전 입구 화면을 대신함): 사진(photos/web/1.jpg, 2.jpg …) + 문구 */
 let HPOP=0, HPT=0, HPI=0;
@@ -1845,13 +1846,14 @@ function homePopMaybe(force){ if(!PUB) return; if(!force&&/^[A-Z0-9]{4}$/.test(Q
   HPOP=1; const t=H.title||'증평체력인증센터', m=H.msg||'증평체력인증센터입니다.\n저희와 함께 체력을 지켜요~';
   const d=document.createElement('div'); d.className='hpop'; d.id='hpop'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
   d.innerHTML='<div class="hpb"><h2 class="hpt">'+esc(t)+'</h2><div class="hps" id="hps" hidden><div class="trk" id="hptrk"></div><div class="dots" id="hpdots"></div></div><p class="hpm">'+esc(m)+'</p><button type="button" class="hpok" onclick="homePopClose()">확인</button></div>';
-  document.body.appendChild(d); if(MODE==='web') hpLoad(1); }
-function hpLoad(n){ if(n>30||!HPOP) return; const src='photos/web/'+n+'.jpg', im=new Image();   // 번호 사진을 차례로 · 없는 번호에서 멈춤
+  document.body.appendChild(d); if(hpBase()) hpLoad(1); }
+function hpBase(){ if(MODE==='web') return 'photos/web/'; const u=(PUB&&PUB.noticeUrl)||''; return /^https?:\/\//i.test(u)&&!/script\.google\.com|googleusercontent\.com/i.test(u)?u.replace(/[?#].*$/,'').replace(/[^\/]*$/,'')+'photos/web/':''; }
+function hpLoad(n){ if(n>30||!HPOP) return; const src=hpBase()+n+'.jpg', im=new Image();   // 번호 사진을 차례로 · 없는 번호에서 멈춤
   im.onload=()=>{ const tr=$('hptrk'); if(!tr) return; $('hps').hidden=false; tr.appendChild(Object.assign(document.createElement('img'),{src,alt:'센터 사진 '+n}));
     $('hpdots').insertAdjacentHTML('beforeend','<i'+(n===1?' class="on"':'')+'></i>'); if(n===2) HPT=setInterval(hpNext,3500); hpLoad(n+1); };
   im.src=src; }
 function hpNext(){ const tr=$('hptrk'); if(!tr) return clearInterval(HPT); const k=tr.children.length; if(k<2) return; HPI=(HPI+1)%k; tr.style.transform='translateX(-'+(HPI*100)+'%)'; [...$('hpdots').children].forEach((x,i)=>x.classList.toggle('on',i===HPI)); }
-function homePopClose(){ HPOP=0; clearInterval(HPT); HPI=0; const d=$('hpop'); if(d) d.remove(); if(!window.__PV){ try{ localStorage.setItem(hpKey(),'1'); }catch(e){} } }
+function homePopClose(){ HPOP=0; clearInterval(HPT); HPI=0; const d=$('hpop'); if(d) d.remove(); if(!window.__PV){ try{ localStorage.setItem(hpKey(),'1'); }catch(e){} }}
 document.documentElement.dataset.mode='solo'; document.documentElement.dataset.theme='notice';
 /* 일정공지 불러오기: GitHub Pages(web)에서는 마지막 응답을 폰에 저장해 먼저 보여 주고, 뒤에서 새로 받아 달라졌을 때만 다시 그림 */
 const PUB_K='nt_pub_v1'; try{ localStorage.removeItem('nt_pub'); }catch(e){}
