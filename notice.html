@@ -1393,7 +1393,7 @@ document.getElementById('rtry').onclick=function(){
 runOpening();
 /* ====== 일정공지 ====== */
 const MOCK_TODAY='2026-11-16';
-const MOCK_PUB={name:'증평체력인증센터',today:QS.get('today')||MOCK_TODAY,classStart:'2026-11-16',tel:'043-835-4171',signupOpen:QS.get('cls')!=='closed',
+const MOCK_PUB={name:'증평체력인증센터',today:QS.get('today')||MOCK_TODAY,classStart:'2026-11-16',classEnd:QS.get('ce')||'',endOn:QS.get('eon')==='1',endTitle:QS.get('et')||'',endMsg:QS.get('em')||'',tel:'043-835-4171',signupOpen:QS.get('cls')!=='closed',
   signupUrl:'index.html',fitUrl:'fit.html',noticeUrl:'notice.html',
   fit:{start:'2026-11-19',end:'2026-11-28',closed:['2026-11-22'],open:QS.get('fit')==='closed'?'2099-01-01T00:00':'',close:'',int:30,cap:5},   // int·cap = 서버 기본(30분 · 30분당 5명)
   items:[
@@ -1612,7 +1612,13 @@ function loadMember(){ LKST='load'; BUSY=1; draw();
     draw(); }); }
 
 /* ---- 신청·조회 화면 (수업 전 / 신청 중 / 수업 종료 후) ---- */
+const infoOn=()=>!!(PUB&&PUB.endOn);   // 신청·조회 문구 보이기: 켜면 이 문구만
+function infoView(){
+  const t=String(PUB.endTitle||'').trim()||'안내드립니다', m=String(PUB.endMsg||'').trim()||'자세한 내용은 센터로 문의해 주세요.';
+  return '<div class="v7mid"><b class="e1">'+nl2br(t)+'</b>'+m.split('\n').map(x=>'<span class="e2">'+esc(x)+'</span>').join('')+'</div>';
+}
 function applyHtml(){
+  if(infoOn()) return infoView();   // 켜면 수강신청 기간·수업 중·종료 어느 때든 내가 정한 문구만
   if(isEnd()){ if(mcGet()) mcSet(''); return endView(); }   // 수업이 끝나면 이 폰의 회원 등록도 지움
   if(RV==='form') return regForm();
   if(RV==='code'&&LK) return regCode();
@@ -1620,7 +1626,7 @@ function applyHtml(){
   return clsOn()?newView():beforeView();
 }
 function endView(){
-  const t=PUB.endTitle||'1기 증진교실 운영이 종료되었습니다.', m=PUB.endMsg||'참여해주신 회원님께 감사드립니다.\n다음 기수는 문자와 함께 안내드립니다.';
+  const t='1기 증진교실 운영이 종료되었습니다.', m='참여해주신 회원님께 감사드립니다.\n다음 기수는 문자와 함께 안내드립니다.';   // 원래 종료 화면은 기본 문구 (내가 정한 문구는 '안내문구 보이기'를 켰을 때만)
   return '<div class="v7mid"><b class="e1">'+nl2br(t)+'</b>'+m.split('\n').map((x,k)=>'<span class="e'+(k?3:2)+'">'+esc(x)+'</span>').join('')+'</div>';
 }
 function sigPhase(){   // open 신청 중 · before 신청 시작 전 · closed 신청 마감(수업 진행 중) · none 그 밖
@@ -2279,11 +2285,11 @@ window.PWP=(function(){
 </script>
 <script>
 window.__pvReady=()=>!!PUB;
-window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0;
+window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; PUB.endOn=!!v.endOn; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0; if(scr==='info'){ TAB='apply'; RV=''; if(mcGet()&&!LK&&!BUSY) loadMember(); }
   if(v['home.title']!=null||v['home.msg']!=null) PUB.home=Object.assign({},PUB.home||{},{title:v['home.title']||'',msg:v['home.msg']||''});
   homePopClose(); draw(); if(scr==='home') homePopMaybe(true);
   const K={}; if(scr==='home'){ K['home.title']=(PUB.home&&PUB.home.title)||'증평체력인증센터'; K['home.msg']=(PUB.home&&PUB.home.msg)||'증평체력인증센터입니다.'; }
-  else { K.endTitle=PUB.endTitle||'이번 수업이 모두 끝났어요'; K.endMsg=PUB.endMsg||'다음 수강신청 일정은'; } window.__pvDeco(K); };</script>
+  else if(scr==='info'){ if(infoOn()){ K.endTitle=PUB.endTitle||'안내드립니다'; K.endMsg=PUB.endMsg||'자세한 내용은'; } } else { K.endTitle=PUB.endTitle||'이번 수업이 모두 끝났어요'; K.endMsg=PUB.endMsg||'다음 수강신청 일정은'; } window.__pvDeco(K); };</script>
 <style id="kpfix">
 /* 비밀번호 숫자판: 숫자를 칸 한가운데 · 숫자판을 화면 가운데 (점 4개와 같은 축) */
 .pwp .pwp-kp{justify-items:stretch;align-items:stretch;justify-content:center;width:100%;max-width:26rem;margin-left:auto!important;margin-right:auto!important}
