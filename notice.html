@@ -1231,6 +1231,9 @@ html.pz *,html.pz *::before,html.pz *::after,.offs,.offs::before,.offs::after{an
 /* 처음 화면 '내역 조회' 글자: 수강신청과 같은 크기 */
 html[data-mode] .lkh{font-size:var(--t3)}
 </style>
+<style id="v7sw">.nh.v7sw{justify-content:space-between!important;flex-wrap:wrap!important;gap:.2rem .4rem!important;margin:.3rem 0 .6rem!important}.nh.v7sw .nmv{display:inline-flex;align-items:center;gap:0}.nh.v7sw .nvp{width:1.7rem!important;font-size:1.6rem!important}
+.seg{display:inline-flex;border:1px solid #BFCCDA;border-radius:999px;overflow:hidden;background:#fff;margin:0 .1rem}.seg button{border:0;background:none;font:inherit;font-size:.92rem;font-weight:700;color:#7a8a9a;padding:.3rem .9rem;cursor:pointer;white-space:nowrap}.seg button.on{background:#00457f;color:#fff}
+.nh.v7sw .v7tel{margin-left:auto;display:inline-flex;align-items:center;font-size:.98rem;font-weight:800;color:#1F7A4D;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.28em;white-space:nowrap;padding:.35rem .1rem;border:0;background:none;height:auto}.nh.v7sw .v7tel:active{opacity:.6}.nh.v7sw .ntd{flex-basis:100%}</style>
 </head>
 <style id="v7css">
 /* ===== v7 신청·조회 개편: 하단 알약 탭 · 세로 타임라인 · 회원 등록 ===== */
@@ -1556,8 +1559,8 @@ function calHtml(){
   const a0=iso(wkStart()), a6=iso(addD(wkStart(),13)), d0=mAnc();
   const range=w?dshI(a0).replace(/\(.\)/,'')+' ~ '+dshI(a6).replace(/\(.\)/,''):d0.getFullYear()+'년 '+(d0.getMonth()+1)+'월';
   const alw='';
-  const tg='<div class="v7tg"><button type="button" class="'+(w?'on':'')+'" onclick="setNV(\'w\')">주간</button><button type="button" class="'+(w?'':'on')+'" onclick="setNV(\'m\')">월간</button>'+(telHref(tel())?'<a class="v7tel" href="'+telHref(tel())+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="16" height="16"')+'<span>센터연결</span></a>':'')+'</div>';   /* 전화 = 2주·월간 줄 오른쪽 끝 */
-  return '<div class="nsec">'+tg+'<div class="nh"><span class="nr"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button><small>'+range+'</small><button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+'</span>'+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
+  const tel1=telHref(tel()), sw='<span class="seg" role="group" aria-label="보기 바꾸기"><button type="button" class="'+(w?'on':'')+'" aria-pressed="'+(w?'true':'false')+'" onclick="setNV(\'w\')">주간</button><button type="button" class="'+(w?'':'on')+'" aria-pressed="'+(w?'false':'true')+'" onclick="setNV(\'m\')">월간</button></span>';
+  return '<div class="nsec"><div class="nh v7sw"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button>'+sw+'<button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+(tel1?'<a class="v7tel" href="'+tel1+'" aria-label="센터 대표전화로 전화">센터에 전화하기</a>':'')+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
    +(w?calWeek():calMonth())+dh+list+'</div>';
 }
 /* v7 화면은 아래 '신청·조회 개편' 블록에서 그림 */
@@ -1838,7 +1841,7 @@ function mergeItems(L){   // v4: 같은 제목·내용·종류가 날짜로 이�
     if(p&&iso(addD(P(p.e||p.d),1))>=e.d){ if(ee>(p.e||p.d)) p.e=ee; } else { const n=Object.assign({},e); out.push(n); last[k]=n; } });
   return out.concat(L.filter(e=>!e.d)); }
 function init(pub){
-  PUB=pub; today=pub.today||iso(new Date()); SELD=today; PUB.items=mergeItems((PUB.items||[]).filter(e=>!FDUP(e))).concat(fitAuto());
+  PUB=pub; today=pub.today||iso(new Date()); SELD=today; if(QS.get('nv')==='m') NV='m'; PUB.items=mergeItems((PUB.items||[]).filter(e=>!FDUP(e))).concat(fitAuto());
   const hs=$('hsub'); if(hs) hs.textContent='수업일정';
   const MCIN=/^[A-Z0-9]{4}$/.test(QS.get('mc')||'');   // 수강신청을 마치고 넘어옴 → 신청·조회(내 현황)부터
   TAB=(MCIN||QS.get('lk')==='1'||QS.get('go')==='lookup'||isEnd()||(!(PUB.classStart&&today>=PUB.classStart)&&!mcGet()&&clsOn()))?'apply':'home';   // 첫 화면: 수업 중 = 일정 · 종료 후 = 신청·조회 · 수업 전 = 신청 열려 있으면 신청·조회
@@ -1851,7 +1854,7 @@ window.onOpened=function(){ homePopMaybe(); };   // 오프닝이 끝나면 첫 �
 /* 첫 화면 팝업 (관리자설정 > 기본정보 · 예전 입구 화면을 대신함): 사진(photos/web/1.jpg, 2.jpg …) + 문구 */
 let HPOP=0, HPT=0, HPI=0;
 const hpKey=()=>'ntHome|'+today;
-function homePopMaybe(force){ if(!PUB) return; if(!force&&/^[A-Z0-9]{4}$/.test(QS.get('mc')||'')) return; if(window.cgMaybe&&cgMaybe(()=>homePopMaybe(force))) return;   // 수강신청·체력측정을 마치고 넘어온 경우는 팝업 없이
+function homePopMaybe(force){ if(!PUB) return; if(!force&&window.__PV) return; if(!force&&/^[A-Z0-9]{4}$/.test(QS.get('mc')||'')) return; if(window.cgMaybe&&cgMaybe(()=>homePopMaybe(force))) return;   // 수강신청·체력측정을 마치고 넘어온 경우는 팝업 없이
   const H=PUB.home||{on:true}; if(!force&&(H.on===false||isEnd())) return; if(HPOP) return;   // 설정 전에도 기본 문구로 켜짐
   if(!force){ try{ if(localStorage.getItem(hpKey())) return; }catch(e){} }
   HPOP=1; const t=H.title||'증평체력인증센터', m=H.msg||'증평체력인증센터입니다.\n저희와 함께 체력을 지켜요~';
@@ -1963,6 +1966,7 @@ em.evF.rsv{background:repeating-linear-gradient(135deg,#DCF2E3 0 5px,#fff 5px 10
 .wk b em.evS.cr,.wk b em.evF.cr{box-shadow:inset 0 1.5px 0 0 var(--bc),inset 0 -1.5px 0 0 var(--bc),inset 1.5px 0 0 0 var(--bc)!important}
 .wk b em.evS.cl.cr,.wk b em.evF.cl.cr{box-shadow:inset 0 1.5px 0 0 var(--bc),inset 0 -1.5px 0 0 var(--bc)!important}
 .wk b em.evS{--bc:#3B7DC4}.wk b em.evF{--bc:#3c8a5c}
+.v7vt{border:0;background:none;font:inherit;font-size:1.05rem;font-weight:800;color:#00457f;padding:.15rem 0 .25rem;margin-left:.6rem;border-bottom:2.5px solid #00457f;cursor:pointer;white-space:nowrap}
 </style>
 <!-- v4 이 폰에 저장한 기본정보 (이름·전화번호만 · 비밀번호는 저장 안 함) — 일정공지·수강신청·체력측정이 같은 웹앱 주소라 같은 폰·같은 브라우저에서 함께 씀 -->
 <style id="mecss">
