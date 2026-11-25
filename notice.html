@@ -1592,7 +1592,7 @@ const IC={
 };
 function navHtml(){
   const t=(on,fn,ic,lb)=>'<button type="button" class="v7t'+(on?' on':'')+'" onclick="'+fn+'"'+(on?' aria-current="page"':'')+'>'+sv(IC[ic],30)+'<span>'+lb+'</span></button>';
-  return '<nav class="v7nav" aria-label="하단 메뉴">'+t(TAB==='apply',"goTab('apply')",'note','신청·조회')+t(TAB==='home',"goTab('home')",'cal','일정')+t(false,'openNfa()','who','출석체크<br><small style="font-size:.6rem;font-weight:700">(국민체력100)</small>')+'</nav>';
+  return '<nav class="v7nav" aria-label="하단 메뉴">'+t(TAB==='apply',"goTab('apply')",'note','신청·조회')+t(TAB==='home',"goTab('home')",'cal','일정')+t(false,'openNfa()','who','출석체크<br><small style="font-size:.6rem;font-weight:700">국민체력100</small>')+'</nav>';
 }
 function fabHtml(){ const h=telHref(tel()); return false&&TAB==='home'&&h?'<a class="v7fab" href="'+h+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="28" height="28"')+'</a>':''; }
 function drawNotice(){
