@@ -1843,6 +1843,7 @@ function init(pub){
   const MCIN=/^[A-Z0-9]{4}$/.test(QS.get('mc')||'');   // 수강신청을 마치고 넘어옴 → 신청·조회(내 현황)부터
   TAB=(MCIN||QS.get('lk')==='1'||QS.get('go')==='lookup'||isEnd()||(!(PUB.classStart&&today>=PUB.classStart)&&!mcGet()&&clsOn()))?'apply':'home';   // 첫 화면: 수업 중 = 일정 · 종료 후 = 신청·조회 · 수업 전 = 신청 열려 있으면 신청·조회
   ONK=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon();
+  if(window.__PV&&window.__pvV){ PUB.endTitle=window.__pvV.endTitle||''; PUB.endMsg=window.__pvV.endMsg||''; PUB.endOn=!!window.__pvV.endOn; if(window.__pvS==='info'){ TAB='apply'; } }
   draw(); if(TAB==='apply') applyEnter(); opData=true; opTry(); if(opDone&&!MCIN) setTimeout(()=>homePopMaybe(),300);   // 가림막 없이 바로 뜬 경우(재방문)
 }
 
@@ -1870,7 +1871,9 @@ const PUB_K='nt_pub_v1'; try{ localStorage.removeItem('nt_pub'); }catch(e){}
 function pubReady(r){ r.today=r.today||iso(new Date()); return r; }
 function refreshPub(r){   // init 과 달리 탭·팝업은 그대로 두고 데이터만 바꿈 (입력 중이거나 창이 열려 있으면 다음에 그릴 때 반영)
   PUB=r; today=r.today||iso(new Date()); PUB.items=mergeItems((PUB.items||[]).filter(e=>!FDUP(e))).concat(fitAuto());
+  const _pv=window.__PV&&window.__pvV;
   const ae=document.activeElement, typing=ae&&/^(INPUT|TEXTAREA)$/.test(ae.tagName);
+  if(_pv){ window.__pvApply(window.__pvV,window.__pvS); return; }
   if(!typing&&!SHEET&&!(typeof PWP!=='undefined'&&PWP.isOpen())) draw();
 }
 function loadPub(){
@@ -2285,7 +2288,7 @@ window.PWP=(function(){
 </script>
 <script>
 window.__pvReady=()=>!!PUB;
-window.__pvApply=function(v,scr){ PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; PUB.endOn=!!v.endOn; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0; if(scr==='info'){ TAB='apply'; RV=''; if(mcGet()&&!LK&&!BUSY) loadMember(); }
+window.__pvApply=function(v,scr){ window.__pvV=v; window.__pvS=scr; PUB.endTitle=v.endTitle||''; PUB.endMsg=v.endMsg||''; PUB.endOn=!!v.endOn; window.__pvEnd=scr==='end'; GPOP=0; SHEET=0; if(scr==='info'){ TAB='apply'; RV=''; if(mcGet()&&!LK&&!BUSY) loadMember(); }
   if(v['home.title']!=null||v['home.msg']!=null) PUB.home=Object.assign({},PUB.home||{},{title:v['home.title']||'',msg:v['home.msg']||''});
   homePopClose(); draw(); if(scr==='home') homePopMaybe(true);
   const K={}; if(scr==='home'){ K['home.title']=(PUB.home&&PUB.home.title)||'증평체력인증센터'; K['home.msg']=(PUB.home&&PUB.home.msg)||'증평체력인증센터입니다.'; }
