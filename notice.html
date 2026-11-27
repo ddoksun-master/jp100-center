@@ -1237,8 +1237,8 @@ html[data-mode] .lkh{font-size:var(--t3)}
 </head>
 <style id="v7css">
 /* ===== v7 신청·조회 개편: 하단 알약 탭 · 세로 타임라인 · 회원 등록 ===== */
-.v7con{padding-bottom:7.5rem!important;background:var(--face)}
-.v7nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(.9rem,env(safe-area-inset-bottom));width:calc(100% - 1.75rem);max-width:28rem;z-index:7;display:flex;gap:.25rem;padding:.4rem;border-radius:2.1rem;background:#fff;box-shadow:0 8px 24px rgba(20,32,44,.2),0 0 0 1px var(--line)}
+.v7con{padding-bottom:11.5rem!important;background:var(--face)}
+.v7nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(.9rem,env(safe-area-inset-bottom));width:calc((100% - 1.75rem) * .8);max-width:22.4rem;z-index:7;display:flex;gap:.25rem;padding:.4rem;border-radius:2.1rem;background:#fff;box-shadow:0 8px 24px rgba(20,32,44,.2),0 0 0 1px var(--line)}
 .v7t{flex:1;min-height:3.9rem;border:0;border-radius:1.75rem;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.12rem;padding:.25rem .1rem;font:inherit;cursor:pointer;color:#7B8A99}
 .v7t span{font-size:.69rem;line-height:1.2;font-weight:700;color:var(--sub);word-break:keep-all;text-align:center}
 .v7t.on{background:var(--sky);color:var(--navy)}.v7t.on span{font-weight:800;color:var(--navy)}
@@ -1287,6 +1287,16 @@ html[data-mode] .lkh{font-size:var(--t3)}
 .tlm{font-size:.82rem;font-weight:600;color:var(--sub);line-height:1.5}
 .tla{display:flex;gap:.9rem;justify-content:flex-end}.tla button{border:0;background:none;font:inherit;font-size:.85rem;font-weight:700;color:var(--sub);text-decoration:underline;text-underline-offset:.25em;min-height:2.2rem;cursor:pointer}
 .tgo{display:flex;align-items:center;justify-content:space-between;min-height:3.2rem;padding:0 1.1rem;border:0;border-radius:1rem;background:#12483A;color:#fff;font:inherit;font-size:1rem;font-weight:800;cursor:pointer}
+.v7login{position:fixed;left:0;bottom:calc(max(.9rem,env(safe-area-inset-bottom)) + 5.1rem);z-index:6;width:100%;display:flex;align-items:center;justify-content:center;gap:.6rem;min-height:3.4rem;margin:0;padding:0 1.1rem;border:0;border-radius:0;background:var(--sky);color:var(--navy);font:inherit;cursor:pointer;box-sizing:border-box}.v7login b{font-size:1.05rem;font-weight:800}.v7login span{margin-left:.2rem;font-size:1.5rem;font-weight:800}
+.fpv{padding:.9rem 1rem 1rem;display:flex;flex-direction:column;gap:.8rem;text-align:center}
+.fpv-note{background:#FDE7C8;color:#7A4A00;border-radius:1rem;padding:.65rem;display:flex;flex-direction:column}.fpv-note b{font-size:1.2rem;font-weight:900}.fpv-note span{font-size:.95rem;font-weight:700}
+.fpv h2{margin:.1rem 0;font-size:1.35rem;font-weight:900}
+.fpv button{font:inherit;cursor:pointer}
+.fpv-tabs{display:flex;gap:.5rem}.fpv-tabs button{flex:1;border:2px solid var(--navy);background:#fff;color:var(--navy);border-radius:.9rem;padding:.5rem 0;display:flex;flex-direction:column;align-items:center}.fpv-tabs button.on{background:var(--navy);color:#fff}.fpv-tabs b{font-size:1.15rem}.fpv-tabs small{font-size:.72rem;font-weight:700}
+.fpv-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:.25rem;background:#fff;border-radius:1rem;padding:.6rem .5rem}.fpv-cal i{font-style:normal;font-size:.78rem;font-weight:800;color:var(--sub)}.fpv-cal span,.fpv-cal button{min-height:2.6rem;display:flex;align-items:center;justify-content:center;border:0;border-radius:.7rem;font-weight:800;font-size:.95rem;padding:0}.fpv-cal span{color:#AEB8C2}.fpv-cal button{background:#fff;color:var(--ink)}.fpv-cal button.ok{background:var(--sky);color:var(--navy)}.fpv-cal button.on{outline:3px solid var(--navy);outline-offset:-3px}
+.fpv-times{background:#fff;border-radius:1rem;padding:.8rem 1rem;text-align:left}.fpv-times strong{font-size:1rem}.fpv-times ul{list-style:none;margin:.4rem 0 0;padding:0}.fpv-times li{display:flex;gap:.8rem;padding:.4rem 0}.fpv-times li b{flex:none;width:4.8rem}.fpv-times li span{font-weight:600;line-height:1.5}.fpv-times p{margin:.5rem 0 0;font-weight:700;color:var(--sub);text-align:center}
+.fpv-open{font-size:1.05rem;font-weight:700}.fpv-open b{display:block;font-size:1.2rem;color:var(--navy)}
+.fpv-x{min-height:3.3rem;border:0;border-radius:1rem;background:var(--navy);color:#fff;font-size:1.1rem!important;font-weight:800}
 .okbox{border-radius:.75rem;background:#E3F4EC;padding:.65rem .8rem;display:flex;flex-direction:column;gap:.1rem}.okbox b{font-size:1rem;font-weight:800;color:#12483A}.okbox span{font-size:.92rem;font-weight:700;color:var(--ink)}
 </style>
 <body class="opre">
@@ -1502,7 +1512,8 @@ function setNV(v){ NV=v; OFW=0; OFM=0; SELD=today; MORE=false; draw(); }
 function selD(s){ SELD=s; MORE=false; draw(); }
 function togMore(){ MORE=!MORE; draw(); }
 const evRange=e=>e.e&&e.e!==e.d?dshI(e.d).replace(/\(.\)/,'')+'~'+(e.e.slice(0,7)===e.d.slice(0,7)?String(+e.e.slice(8)):dshI(e.e).replace(/\(.\)/,'')):dshI(e.d);
-function evCard(s,e,showDate,tOnly){ return '<div class="ecard e4 '+evCls(e).split(' ').map(x=>'ck-'+x).join(' ')+(tOnly?' tonly':'')+'"><div class="eh"><span class="tg '+evCls(e)+'">'+esc(evKind(e))+'</span><b>'+(showDate||(e.e&&e.e!==e.d)?'<span class="erg">'+evRange(e)+'</span> ':'')+esc(e.t)+(e.off&&e.off.length?' <small class="eoff">('+e.off.map(d=>+d.slice(8)).join('·')+'일 제외)</small>':'')+'</b></div>'+(e.c&&!tOnly?'<p>'+esc(e.c).replace(/\n/g,'<br>')+'</p>':'')+'</div>'; }
+function evCard(s,e,showDate,tOnly){ return '<div class="ecard e4 '+evCls(e).split(' ').map(x=>'ck-'+x).join(' ')+(tOnly?' tonly':'')+'"><div class="eh"'+(tOnly?' role="button" tabindex="0" aria-expanded="false" onclick="evOpen(this)" onkeydown="if(event.key===\'Enter\')evOpen(this)"':'')+'><span class="tg '+evCls(e)+'">'+esc(evKind(e))+'</span><b>'+(showDate||(e.e&&e.e!==e.d)?'<span class="erg">'+evRange(e)+'</span> ':'')+esc(e.t)+(e.off&&e.off.length?' <small class="eoff">('+e.off.map(d=>+d.slice(8)).join('·')+'일 제외)</small>':'')+'</b>'+(tOnly?'<i class="evc" aria-hidden="true">▾</i>':'')+'</div>'+(tOnly?'<p class="evd" hidden>'+(e.c?esc(e.c).replace(/\n/g,'<br>'):evRange(e)+'<br>등록된 자세한 내용이 없어요.')+'</p>':e.c?'<p>'+esc(e.c).replace(/\n/g,'<br>')+'</p>':'')+'</div>'; }
+function evOpen(h){ const p=h.nextElementSibling; if(!p) return; p.hidden=!p.hidden; h.setAttribute('aria-expanded',String(!p.hidden)); h.parentElement.classList.toggle('open',!p.hidden); }
 const mdI=k=>(+k.slice(5,7))+'/'+(+k.slice(8,10));
 const hmI=hm=>{ const h=+hm.slice(0,2), m=hm.slice(3,5); return (h<12?'오전 ':'오후 ')+pad(((h+11)%12)+1)+':'+m; };
 const dDiff=k=>Math.round((P(k.slice(0,10))-P(today))/86400000);
@@ -1595,15 +1606,17 @@ const IC={
 };
 function navHtml(){
   const t=(on,fn,ic,lb)=>'<button type="button" class="v7t'+(on?' on':'')+'" onclick="'+fn+'"'+(on?' aria-current="page"':'')+'>'+sv(IC[ic],30)+'<span>'+lb+'</span></button>';
-  return '<nav class="v7nav" aria-label="하단 메뉴">'+t(TAB==='apply',"goTab('apply')",'note','신청·조회')+t(TAB==='home',"goTab('home')",'cal','일정')+t(false,'openNfa()','who','로그인<br><small style="font-size:.6rem;font-weight:700">국민체력100</small>')+'</nav>';
+  return '<nav class="v7nav" aria-label="하단 메뉴">'+t(TAB==='apply',"goTab('apply')",'note','신청·조회')+t(TAB==='home',"goTab('home')",'cal','일정')+'</nav>';
 }
+const loginBand=()=>'<button type="button" class="v7login" onclick="openNfa()">'+sv(IC.who,26)+'<b>국민체력100 로그인</b><span aria-hidden="true">›</span></button>';
 function fabHtml(){ const h=telHref(tel()); return false&&TAB==='home'&&h?'<a class="v7fab" href="'+h+'" aria-label="센터 대표전화로 전화">'+PHONE_SVG.replace('width="26" height="26"','width="28" height="28"')+'</a>':''; }
 function drawNotice(){
-  const body=TAB==='apply'?'<div class="v7ap">'+applyHtml()+'</div>':'<div class="v7cal">'+calHtml()+'</div>';
-  return '<div class="nview"><div class="ncon v7con">'+body+'</div>'+navHtml()+fabHtml()+'</div>';
+  if(FPV&&!pvOk()){ FPV=null; if(fitOn()) setTimeout(()=>toastMsg('체력측정 예약이 시작됐어요'),0); }   // 오픈 시각이 되면 미리보기는 자동 종료
+  const body=FPV?pvHtml():TAB==='apply'?'<div class="v7ap">'+applyHtml()+'</div>':'<div class="v7cal">'+calHtml()+'</div>';
+  return '<div class="nview"><div class="ncon v7con">'+(FPV?'':loginBand())+body+'</div>'+navHtml()+fabHtml()+'</div>';
 }
 function goTab(t,fromPop){ if(MODE==='web'&&!fromPop&&t!==TAB){ try{ history.pushState({nt:t},''); }catch(e){} }   // 폰 뒤로가기 = 이전 탭 (GitHub Pages 에서만 · 구글 웹 앱 안에서는 믿을 수 없어 화면의 이전 버튼을 씀)
-  TAB=t; if(t==='apply') applyEnter(); draw(); try{ window.scrollTo(0,0); }catch(e){} }
+  TAB=t; FPV=null; if(t==='apply') applyEnter(); draw(); try{ window.scrollTo(0,0); }catch(e){} }
 addEventListener('popstate',()=>{ if(MODE==='web'&&TAB!=='home'&&!(typeof PWP!=='undefined'&&PWP.isOpen())) goTab('home',true); });
 function applyEnter(){ if(mcGet()&&!LK&&!BUSY&&!RV&&!isEnd()) loadMember(); }
 /* 비밀번호 없이: 저장된 회원코드로 현황 조회 (서버 lookupMember) */
@@ -1754,6 +1767,35 @@ function doAct(pw){
     if(r.msg) toastMsg(r.msg);
     ACT=null; BUSY=1; api('lookupMember',[mcGet()],q=>{ BUSY=0; if(q&&q.ok&&q.found) LK=q; draw(); }); });
 }
+/* ---- 예약 오픈 전 '일정 미리보기' : notice 안에서 보기만 (시간은 글자 목록 · 선택·예약 없음) ---- */
+let FPV=null;
+function pvSlots(d){ const F=fcfg(), ds=F.dslots&&F.dslots[d]; if(ds) return ds.slice();
+  const m=s=>+s.slice(0,2)*60+ +s.slice(3,5), out=[]; pvTabs().forEach(t=>{ if(t.days&&t.days.indexOf(d)<0) return; for(let x=m(t.s);x<m(t.e);x+=(+F.int||30)) if(out.indexOf(x)<0) out.push(x); }); return out; }
+function pvTabs(){ const t=fcfg().tabs; return t&&t.length?t:[{k:'아침',s:'09:00',e:'11:00'},{k:'점심',s:'13:00',e:'17:00'},{k:'저녁',s:'18:00',e:'20:00'}]; }
+function pvIn(d,t){ const m=s=>+s.slice(0,2)*60+ +s.slice(3,5); return pvSlots(d).filter(x=>x>=m(t.s)&&x<m(t.e)).sort((a,b)=>a-b); }
+function pvDays(t){ const F=fcfg(), out=[]; if(!F.start||!F.end) return out; for(let d=P(F.start);iso(d)<=F.end;d=addD(d,1)){ const s=iso(d); if(s>=today&&(F.closed||[]).indexOf(s)<0&&pvIn(s,t).length) out.push(s); } return out; }
+const pvOk=()=>fitPhase()==='before'&&pvTabs().some(t=>pvDays(t).length);
+function pvOpen(){ const i=pvTabs().findIndex(t=>pvDays(t).length); if(i<0) return; FPV={tab:i,date:pvDays(pvTabs()[i])[0]}; draw(); try{ window.scrollTo(0,0); }catch(e){} }
+function pvClose(){ FPV=null; draw(); try{ window.scrollTo(0,0); }catch(e){} }
+function pvTab(i){ FPV.tab=i; const ds=pvDays(pvTabs()[i]); if(!FPV.date) FPV.date=ds[0]||''; draw(); }
+function pvDate(d){ FPV.date=d; draw(); }
+function pvHtml(){
+  const F=fcfg(), T=pvTabs(), t=T[FPV.tab], ds=pvDays(t), all=[].concat(...T.map(pvDays)).sort();
+  const first=P(all[0]||F.start), lastD=P(all[all.length-1]||F.end), h12=s=>(+s.slice(0,2)%12||12)+s.slice(2);
+  let cal=DAYN.map(x=>'<i>'+x+'</i>').join(''), mon=-1;
+  for(let d=addD(first,-first.getDay());d<=addD(lastD,6-lastD.getDay());d=addD(d,1)){ const s=iso(d), ok=ds.indexOf(s)>=0;
+    const mm=d.getDate()===1||mon<0; mon=d.getMonth(); const lb=mm?(d.getMonth()+1)+'/'+d.getDate():d.getDate();
+    cal+=ok||s===FPV.date?'<button type="button" class="'+(ok?'ok':'')+(s===FPV.date?' on':'')+'" aria-pressed="'+(s===FPV.date)+'" onclick="pvDate(\''+s+'\')">'+lb+'</button>':'<span>'+lb+'</span>'; }
+  const sl=FPV.date?pvIn(FPV.date,t):[], by={};
+  sl.forEach(m=>{ const h=Math.floor(m/60); (by[h]=by[h]||[]).push(pad(m%60)+'분'); });
+  const rows=Object.keys(by).map(Number).sort((a,b)=>a-b).map(h=>'<li><b>'+(h<12?'오전 ':'오후 ')+(h%12||12)+'시</b><span>'+by[h].join(' · ')+'</span></li>').join('');
+  return '<div class="fpv"><div class="fpv-note" role="note"><b>일정 미리보기</b><span>지금은 예약이 안 돼요</span></div><h2>측정 가능한 시간 안내</h2>'
+   +'<div class="fpv-tabs">'+T.map((x,i)=>'<button type="button" class="'+(i===FPV.tab?'on':'')+'" aria-pressed="'+(i===FPV.tab)+'" onclick="pvTab('+i+')"><b>'+esc(x.k)+'</b><small>'+h12(x.s)+'~'+h12(x.e)+'</small></button>').join('')+'</div>'
+   +'<div class="fpv-cal">'+cal+'</div>'
+   +'<div class="fpv-times">'+(FPV.date?'<strong>'+dlabI(FPV.date)+'</strong>':'')+(rows?'<ul>'+rows+'</ul>':'<p>이 시간대에는 측정 시간이 없어요</p>')+'</div>'
+   +'<div class="fpv-open"><b>'+fitDT(F.open)+'부터</b>예약할 수 있어요</div>'
+   +'<button type="button" class="fpv-x" onclick="pvClose()">닫기</button></div>';
+}
 /* 체력측정 예약하기: 여기서 비밀번호를 한 번 확인 → 서버 열쇠(15분)를 받아 체력측정 화면으로 (거기서는 다시 묻지 않음) */
 function goFit(chg){
   if(!mcGet()) return goUrl(fitUrl());
@@ -1786,7 +1828,7 @@ function memberView(){
     else if(f.status==='booked') x={t:'now',k:'예약',sub:dlabI(f.date)+' '+esc(f.time)+' 예약',
       html:fl+(fitOn()?'<div class="tla"><button type="button" onclick="actK(\'fit\',\'chg\')">예약 변경</button><button type="button" onclick="actK(\'fit\',\'cnl\')">예약 취소</button></div>':'<div class="tlm">변경·취소는 센터로 전화해 주세요.</div>')};
     else if(ph==='open') x={t:'now',k:'예약',sub:(f.status==='cancelled'?'예약이 취소되었어요. ':'')+'지금 예약해요',html:'<button type="button" class="tgo" onclick="goFit()">체력측정 예약 바로가기 ›</button>'};
-    else if(ph==='before') x={t:'next',k:'예약',sub:fitDT(F.open)+' 오픈'};
+    else if(ph==='before') x={t:'next',k:'예약',sub:fitDT(F.open)+' 오픈',html:'<button type="button" class="tgo" onclick="pvOpen()">일정 미리보기 ›</button>'};
     else if(ph==='none') x={t:'lock',k:'예약',sub:'체력측정 일정은 추후 공지돼요'};
     else x={t:'lock',k:'예약',sub:'예약 기간이 끝났어요',html:'<div class="tlm">센터로 문의해 주세요.</div>'};
     steps.push(x);
@@ -1859,7 +1901,7 @@ function homePopMaybe(force){ if(!PUB) return; if(!force&&window.__PV) return; i
   if(!force){ try{ if(localStorage.getItem(hpKey())) return; }catch(e){} }
   HPOP=1; const t=H.title||'증평체력인증센터', m=H.msg||'증평체력인증센터입니다.\n저희와 함께 체력을 지켜요~';
   const d=document.createElement('div'); d.className='hpop'; d.id='hpop'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
-  d.innerHTML='<div class="hpb"><h2 class="hpt">'+esc(t)+'</h2><div class="hps" id="hps" hidden><div class="trk" id="hptrk"></div><div class="dots" id="hpdots"></div></div><p class="hpm">'+esc(m)+'</p><button type="button" class="hpok" onclick="homePopClose()">확인</button></div>';
+  d.innerHTML='<div class="hpb"><h2 class="hpt">'+esc(t)+'</h2><div class="hps" id="hps" hidden><div class="trk" id="hptrk"></div><div class="dots" id="hpdots"></div></div><p class="hpm">'+esc(m)+'</p><button type="button" class="hpok" onclick="homePopClose()">입장하기</button></div>';
   document.body.appendChild(d); if(hpBase()) hpLoad(1); }
 function hpBase(){ if(MODE==='web') return 'photos/web/'; const u=(PUB&&PUB.noticeUrl)||''; return /^https?:\/\//i.test(u)&&!/script\.google\.com|googleusercontent\.com/i.test(u)?u.replace(/[?#].*$/,'').replace(/[^\/]*$/,'')+'photos/web/':''; }
 function hpLoad(n){ if(n>30||!HPOP) return; const src=hpBase()+n+'.jpg', im=new Image();   // 번호 사진을 차례로 · 없는 번호에서 멈춤
@@ -1922,6 +1964,7 @@ else addEventListener('load',()=>init(MOCK.getNotice()));   // 미리보기: 아
 .ecard.e4 .eh .tg{background:#fff!important}
 .ecard.e4 p{margin:0;padding:.5rem .8rem .65rem;background:#fff}
 .ecard.e4.tonly .eh b{font-size:var(--t4)}
+.ecard.e4.tonly .eh{cursor:pointer;align-items:center}.ecard.e4.tonly .evc{margin-left:auto;padding-left:.5rem;font-style:normal;color:var(--sub)}.ecard.e4.tonly.open .evc{transform:rotate(180deg);padding:0 .5rem 0 0}.ecard.e4.tonly .evd[hidden]{display:none}
 em.evF.rsv{background:repeating-linear-gradient(135deg,#DCF2E3 0 5px,#fff 5px 10px)!important;box-shadow:inset 0 0 0 1px #8CCBA3}
 .entr{display:flex;align-items:center;gap:.6rem}.entr .ent{flex:1}
 .entr small.dd2{flex:none;font-size:var(--t5);font-weight:900;color:#B5470B;white-space:nowrap}
@@ -2105,7 +2148,7 @@ html[data-mode] .v7rr .gin::placeholder{color:#8A97A3;font-weight:500}
 .v7cal .wk b{background:#fff;min-height:5.3rem;padding:.3rem 0 .2rem;text-align:left;font-size:1.05em;font-weight:700}
 .v7cal .wk b.m{min-height:4.5rem}
 .v7cal .wk b.e{background:#F3F7FB}
-.v7cal .wk b>span{display:inline-flex;align-items:center;justify-content:center;min-width:1.9rem;height:1.9rem;margin-left:.3rem;border-radius:50%;padding:0}
+.v7cal .wk b>span{display:flex;align-items:center;justify-content:center;align-self:center;width:1.9rem;height:1.9rem;margin:0 auto;border-radius:50%;padding:0}
 .v7cal .wk b.td>span{background:#00457f;color:#fff;border-radius:50%;padding:0}
 .v7cal .wk b,.v7cal .wk b.sel{border-radius:0}
 .v7cal .wk b.sel{background:#E6F2FB;box-shadow:none}
