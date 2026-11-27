@@ -1499,7 +1499,7 @@ const mAnc=()=>{ const d=P(today); return new Date(d.getFullYear(),d.getMonth()+
 function mvP(n){ if(NV==='w') OFW+=n; else OFM+=n; const per=perDays(); SELD=per.indexOf(today)>=0?today:per[0]; MORE=false; draw(); }
 function goToday(){ OFW=0; OFM=0; SELD=today; MORE=false; draw(); }
 function pkCell(s,m){ return '<b class="'+(m?'m ':'')+'pk'+(s===today?' td':'')+(s===SELD?' sel':'')+'" onclick="selD(\''+s+'\')"><span>'+dayI(s)+'</span>'+evCell(s)+'</b>'; }
-const hdr=()=>DAYN.map((x,i)=>'<i class="'+(i==0?'s':i==6?'t':'')+'">'+x+'</i>').join('');
+const hdr=()=>DAYN.map((x,i)=>'<i class="'+(i==0?'s':i==6?'t':'')+'"><u>'+x+'</u></i>').join('');
 function calWeek(){ const a=wkStart(); buildLanes(Array.from({length:14},(_,i)=>iso(addD(a,i)))); let c=''; for(let i=0;i<14;i++) c+=pkCell(iso(addD(a,i)),false); return '<div class="wk">'+hdr()+c+'</div>'; }   // v3: 2주
 function calMonth(){ const d=mAnc(), y=d.getFullYear(), mo=d.getMonth(), lead=new Date(y,mo,1).getDay(), n=new Date(y,mo+1,0).getDate(); let c=''; buildLanes(Array.from({length:n},(_,i)=>y+'-'+pad(mo+1)+'-'+pad(i+1)));
   for(let i=0;i<lead;i++) c+='<b class="m e"></b>';
@@ -1642,7 +1642,7 @@ function applyHtml(){
   return clsOn()?newView():beforeView();
 }
 function endView(){
-  const t='1기 증진교실 운영이 종료되었습니다.', m='참여해주신 회원님께 감사드립니다.\n다음 기수는 문자와 함께 안내드립니다.';   // 원래 종료 화면은 기본 문구 (내가 정한 문구는 '안내문구 보이기'를 켰을 때만)
+  const t=String((PUB&&PUB.classEndTitle)||'').trim()||'증진교실 운영이 종료되었습니다.', m=String((PUB&&PUB.classEndMsg)||'').trim()||'참여해주신 회원님께 감사드립니다.\n다음 기수는 문자와 함께 안내드립니다.';   // 원래 종료 화면은 기본 문구 (내가 정한 문구는 '안내문구 보이기'를 켰을 때만)
   return '<div class="v7mid"><b class="e1">'+nl2br(t)+'</b>'+m.split('\n').map((x,k)=>'<span class="e'+(k?3:2)+'">'+esc(x)+'</span>').join('')+'</div>';
 }
 function sigPhase(){   // open 신청 중 · before 신청 시작 전 · closed 신청 마감(수업 진행 중) · none 그 밖
@@ -2504,11 +2504,19 @@ html .gcin .gb small.gtm{margin-left:0}
   window.olRefit=function(){ sigs=new WeakMap(); pass(); };
 })();
 </script>
+<style id="v7calcss">
+/* 달력 날짜 = 칸 왼쪽 정렬 · 오늘 동그라미는 숫자 한가운데 */
+.v7cal .wk,.wk{--dn:1.9rem}
+.v7cal .wk b>span,.wk b>span{display:flex!important;align-items:center;justify-content:center;flex:none;align-self:flex-start!important;box-sizing:border-box;width:var(--dn)!important;height:var(--dn)!important;margin:0 0 0 2px!important;padding:2px 0 0!important;line-height:1!important;text-align:center;text-decoration:none!important;font-variant-numeric:tabular-nums;letter-spacing:0}
+.v7cal .wk i,.wk i{display:flex!important;justify-content:flex-start;padding-left:2px!important;padding-right:0!important}
+.wk i::before{content:none}
+.v7cal .wk i>u,.wk i>u{display:block;width:var(--dn);text-align:center;text-decoration:none;font-style:normal}
+</style>
 <style id="v7botcss">
-:root{--v7h:54px;--v7bg:#ffd84d;--v7fg:#2f2600;--v7line:#00457f}   /* 로그인 띠 색: 남색 #00457f · 회색 #3d4854 · 주황 #b4540a · 노랑 #ffd84d(글자색 --v7fg) */
+:root{--v7h:50px;--v7bg:#ffd84d;--v7fg:#2f2600;--v7line:#00457f}   /* 로그인 띠 색: 남색 #00457f · 회색 #3d4854 · 주황 #b4540a · 노랑 #ffd84d(글자색 --v7fg) */
 @media (min-width:600px){:root{--v7h:46px}}
 @media (max-height:640px){:root{--v7h:46px}}
-.v7nav{left:0!important;right:0;transform:none!important;width:100%!important;max-width:none!important;bottom:calc(var(--v7h) + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box;height:var(--v7h);padding:5px max(8%,calc((100% - 22.4rem) / 2))!important;gap:10px!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important}
+.v7nav{left:0!important;right:0;transform:none!important;width:100%!important;max-width:none!important;bottom:calc(var(--v7h) + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box;height:var(--v7h);padding:4px max(8%,calc((100% - 22.4rem) / 2))!important;gap:10px!important;border:0!important;border-radius:0!important;box-shadow:0 -5px 14px rgba(20,40,70,.18)!important;background:#fff!important}
 .v7t{min-height:0!important;height:100%;flex-direction:row!important;gap:.4rem!important;padding:0 .2rem!important;border:0!important;border-radius:999px!important;background:transparent!important}
 .v7t.on{background:#d6eaf9!important}
 .v7t:active{background:#d6eaf9!important;transform:scale(.96)}
