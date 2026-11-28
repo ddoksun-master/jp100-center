@@ -1512,7 +1512,10 @@ function setNV(v){ NV=v; OFW=0; OFM=0; SELD=today; MORE=false; draw(); }
 function selD(s){ SELD=s; MORE=false; draw(); }
 function togMore(){ MORE=!MORE; draw(); }
 const evRange=e=>e.e&&e.e!==e.d?dshI(e.d).replace(/\(.\)/,'')+'~'+(e.e.slice(0,7)===e.d.slice(0,7)?String(+e.e.slice(8)):dshI(e.e).replace(/\(.\)/,'')):dshI(e.d);
-function evCard(s,e,showDate,tOnly){ return '<div class="ecard e4 '+evCls(e).split(' ').map(x=>'ck-'+x).join(' ')+(tOnly?' tonly':'')+'"><div class="eh"'+(tOnly?' role="button" tabindex="0" aria-expanded="false" onclick="evOpen(this)" onkeydown="if(event.key===\'Enter\')evOpen(this)"':'')+'><span class="tg '+evCls(e)+'">'+esc(evKind(e))+'</span><b>'+(showDate||(e.e&&e.e!==e.d)?'<span class="erg">'+evRange(e)+'</span> ':'')+esc(e.t)+(e.off&&e.off.length?' <small class="eoff">('+e.off.map(d=>+d.slice(8)).join('·')+'일 제외)</small>':'')+'</b>'+(tOnly?'<i class="evc" aria-hidden="true">▾</i>':'')+'</div>'+(tOnly?'<p class="evd" hidden>'+(e.c?esc(e.c).replace(/\n/g,'<br>'):evRange(e)+'<br>등록된 자세한 내용이 없어요.')+'</p>':e.c?'<p>'+esc(e.c).replace(/\n/g,'<br>')+'</p>':'')+'</div>'; }
+const evPast=(s,e)=>(e.e||e.d||s)<today;   // 마지막 날이 오늘보다 전이면 지난 일정
+function evCard(s,e){ const md=k=>(+k.slice(5,7))+'/'+(+k.slice(8,10)), many=e.e&&e.e!==e.d;
+  const when=many?md(e.d)+'~'+(e.e.slice(0,7)===e.d.slice(0,7)?+e.e.slice(8):md(e.e)):md(e.d||s)+'('+wdI(e.d||s)+')';
+  return '<div class="ncard '+evCls(e)+(evPast(s,e)?' past':'')+'"><button type="button" class="nrow" aria-expanded="false" onclick="evOpen(this)"><span class="nd">'+when+'</span><b>'+esc(e.t)+'</b><i aria-hidden="true">▾</i></button><div class="nbody" hidden><p>'+(e.c?esc(e.c).replace(/\n/g,'<br>'):'등록된 자세한 내용이 없어요.')+'</p></div></div>'; }
 function evOpen(h){ const p=h.nextElementSibling; if(!p) return; p.hidden=!p.hidden; h.setAttribute('aria-expanded',String(!p.hidden)); h.parentElement.classList.toggle('open',!p.hidden); }
 const mdI=k=>(+k.slice(5,7))+'/'+(+k.slice(8,10));
 const hmI=hm=>{ const h=+hm.slice(0,2), m=hm.slice(3,5); return (h<12?'오전 ':'오후 ')+pad(((h+11)%12)+1)+':'+m; };
@@ -1564,15 +1567,15 @@ function calHtml(){
   if(fp&&!seen.has(fp)&&per.some(s=>mksOn(s).length)) all.push([fp.d,fp]);
   let list;
   if(mine.length){ const oth=all.filter(x=>x[0]!==SELD);
-    list=mine.map(e=>evCard(SELD,e,false)).join('');
-  } else list=(all.length?'<p class="nonote">이 날은 일정이 없어요.<br>'+pn+' 일정을 보여드려요.</p>'+all.map(x=>evCard(x[0],x[1],true,true)).join(''):'<p class="nonote">이 날은 일정이 없어요.</p>');
-  const dh='<div class="dayh"><b>'+dayI(SELD)+'('+wdI(SELD)+')</b>'+(SELD===today?'<span class="bd">오늘</span>':'')+(mine.length?'':'<small>일정 없음</small>')+'</div>';
+    list=mine.slice().sort((a,b)=>evPast(SELD,a)-evPast(SELD,b)).map(e=>evCard(SELD,e,false)).join('');
+  } else list=(all.length?'<p class="nonote one">이 날은 일정이 없어요. '+pn+' 일정을 보여드려요.</p>'+all.slice().sort((a,b)=>evPast(a[0],a[1])-evPast(b[0],b[1])).map(x=>evCard(x[0],x[1],true,true)).join(''):'<p class="nonote">이 날은 일정이 없어요.</p>');
+  const dh='<div class="dayh"><b>'+dayI(SELD)+'('+wdI(SELD)+')</b>'+(SELD===today?'<span class="bd">오늘</span>':'')+(telHref(tel())?'<a class="daytel" href="'+telHref(tel())+'" aria-label="센터에 전화로 문의하기">'+PHONE_SVG+'<span>문의하기</span></a>':'')+'</div>';
   const a0=iso(wkStart()), a6=iso(addD(wkStart(),13)), d0=mAnc();
   const range=w?dshI(a0).replace(/\(.\)/,'')+' ~ '+dshI(a6).replace(/\(.\)/,''):d0.getFullYear()+'년 '+(d0.getMonth()+1)+'월';
   const alw='';
   const tel1=telHref(tel()), sw='<span class="seg" role="group" aria-label="보기 바꾸기"><button type="button" class="'+(w?'on':'')+'" aria-pressed="'+(w?'true':'false')+'" onclick="setNV(\'w\')">주간</button><button type="button" class="'+(w?'':'on')+'" aria-pressed="'+(w?'false':'true')+'" onclick="setNV(\'m\')">월간</button></span>';
-  return '<div class="nsec"><div class="nh v7sw"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button>'+sw+'<button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+'<b class="v7month" aria-live="polite">'+((w?(per.indexOf(SELD)>=0?P(SELD):addD(wkStart(),7)):mAnc()).getMonth()+1)+'월</b>'+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
-   +(w?calWeek():calMonth())+(tel1?'<div class="v7telrow">'+(tel1?'<a class="v7tel" href="'+tel1+'" aria-label="센터 대표전화로 전화"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02z"/></svg><span>전화연결</span></a>':'')+'</div>':'')+dh+list+'</div>';
+  return '<div class="nsec"><div class="nh v7sw"><span class="nmv"><button class="nvp" onclick="mvP(-1)" aria-label="이전">‹</button><b class="v7month" aria-live="polite">'+((w?(per.indexOf(SELD)>=0?P(SELD):addD(wkStart(),7)):mAnc()).getMonth()+1)+'월</b><button class="nvp" onclick="mvP(1)" aria-label="다음">›</button></span>'+sw+((w?OFW:OFM)?'<button class="ntd" onclick="goToday()">오늘로 돌아가기</button>':'')+'</div>'
+   +(w?calWeek():calMonth())+dh+list+'</div>';
 }
 /* v7 화면은 아래 '신청·조회 개편' 블록에서 그림 */
 /* ---------- 조회하기 ---------- */
@@ -1628,10 +1631,10 @@ function loadMember(){ LKST='load'; BUSY=1; draw();
     draw(); }); }
 
 /* ---- 신청·조회 화면 (수업 전 / 신청 중 / 수업 종료 후) ---- */
-const infoOn=()=>!!(PUB&&PUB.endOn);   // 신청·조회 문구 보이기: 켜면 이 문구만
+const infoOn=()=>!!(PUB&&PUB.endOn);   // 조회·일정 안내문구: 켜짐 + 문구가 있을 때만
 function infoView(){
   const t=String(PUB.endTitle||'').trim()||'안내드립니다', m=String(PUB.endMsg||'').trim()||'자세한 내용은 센터로 문의해 주세요.';
-  return '<div class="v7mid"><b class="e1">'+nl2br(t)+'</b>'+m.split('\n').map(x=>'<span class="e2">'+esc(x)+'</span>').join('')+'</div>';
+  return '<div class="v7mid">'+(t?'<b class="e1">'+nl2br(t)+'</b>':'')+(m?m.split('\n').map(x=>'<span class="e2">'+esc(x)+'</span>').join(''):'')+'</div>';
 }
 function applyHtml(){
   if(infoOn()) return infoView();   // 켜면 수강신청 기간·수업 중·종료 어느 때든 내가 정한 문구만
@@ -2535,6 +2538,66 @@ html .gcin .gb small.gtm{margin-left:0}
 .v7telrow{display:flex;justify-content:flex-end;margin:.15rem 0 .1rem}
 .v7telrow .v7tel{margin:0!important;padding:.45rem .3rem!important;display:inline-flex;align-items:center;gap:.3rem;color:#6b7280!important;font-size:1.02rem!important;font-weight:800;text-decoration:none!important;white-space:nowrap}
 .v7telrow .v7tel svg{width:1.15rem;height:1.15rem;flex:none}
+</style>
+<style id="v12css">
+.nh.v7sw{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important}
+.nh.v7sw .nmv{grid-column:2!important;grid-row:1;gap:.5rem}
+.nh.v7sw .nmv .v7month{font-size:1.4rem;font-weight:900;color:#00457f;min-width:3.4rem;text-align:center;white-space:nowrap}
+.nh.v7sw .seg{grid-column:3;grid-row:1;justify-self:end;margin:0}
+.nh.v7sw .seg button{font-size:.72rem;padding:.22rem .5rem}
+.v7cal .wk{border:0!important;border-radius:0!important}
+.v7cal .wk b>span{color:#2f3a45}
+.v7cal .wk b:nth-of-type(7n+1)>span{color:#d32f2f}
+.v7cal .wk b:nth-of-type(7n)>span{color:#1565c0}
+.v7cal .wk b.td>span{color:#fff}
+.ncard{--c:#e8863a;margin-top:.6rem;background:#fff;border:1px solid #dde5ee;border-left:.4rem solid var(--c);border-radius:.9rem;padding:.85rem 1rem}
+.ncard.evF{--c:#00457f}.ncard.evS{--c:#0a7bc8}.ncard.ev1{--c:#c62828}.ncard.ev2{--c:#16958b}.ncard.ev4{--c:#6f58c9}
+.ncard.evF,.ncard.evS,.ncard.ev1,.ncard.ev2,.ncard.ev3,.ncard.ev4{background:#fff!important;color:inherit!important}
+:root{--v7h:clamp(66px,19vw,88px);--v7nh:clamp(56px,16vw,76px)}
+.v7nav{border-top:1px solid #dde5ee!important;box-shadow:none!important;padding:5px 4vw!important;gap:3vw!important}
+.v7t{border-radius:1rem!important}
+.v7t span{font-size:clamp(15px,5.1vw,25px)!important;font-weight:800!important}
+.v7t svg{width:clamp(22px,6.8vw,32px)!important;height:clamp(22px,6.8vw,32px)!important}
+.v7login{background:#ffcc00!important;gap:.6rem!important}
+.v7login b{font-size:clamp(17px,5.8vw,28px)!important;color:#111!important;white-space:nowrap}
+.v7login svg{width:clamp(24px,7.2vw,34px)!important;height:clamp(24px,7.2vw,34px)!important;color:#111!important}
+</style>
+<style id="v13css">
+.v7cal .wk{margin-left:-1rem!important;margin-right:-1rem!important;width:calc(100% + 2rem)}
+.dayh{--bh:3.1rem;align-items:center;flex-wrap:nowrap;gap:.4rem}
+.dayh>b{font-size:clamp(1.5rem,8vw,2.3rem);line-height:var(--bh);white-space:nowrap}
+.dayh .bd{display:inline-flex;align-items:center;height:var(--bh);padding:0 .8rem;border-radius:.6rem;font-size:clamp(1rem,5vw,1.4rem);white-space:nowrap}
+.ncard{padding:0;overflow:hidden}
+.ncard .nrow{display:flex;align-items:center;gap:.7rem;width:100%;min-height:3.2rem;padding:0 .9rem;border:0;background:none;font:inherit;color:#2f3a45;text-align:left;cursor:pointer}
+.ncard .nd{flex:none;min-width:4.6rem;font-size:1rem;font-weight:800;color:#00457f;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ncard .nrow b{flex:1;min-width:0;font-size:1.1rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard .nrow i{flex:none;font-style:normal;color:#5b7189;transition:transform .2s}
+.ncard.open .nrow i{transform:rotate(180deg)}
+.nbody{margin:0 .9rem;padding:.65rem 0 .8rem;border-top:1px solid #e6ecf2}
+.nbody[hidden]{display:none}
+.nbody>span{display:block;font-size:.92rem;font-weight:700;color:#5b7189}
+.nbody>p{margin:.35rem 0 0;font-size:1rem;line-height:1.55;color:#2f3a45}
+</style>
+<style id="v14today">.dayh{align-items:baseline!important}.dayh .bd{background:none!important;color:#00457f!important;border:0!important;border-radius:0!important;height:auto!important;line-height:1.2!important;padding:0 0 2px!important;margin-left:.2rem;border-bottom:3px solid #00457f!important}</style>
+<style id="v15final">
+:root{--v7h:46px;--v7nh:54px}
+.dayh{--bh:44px}
+.dayh>b{font-size:26px}
+.dayh .bd{font-size:17px!important}
+.dayh .daytel{position:relative;align-self:center;margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:4px;padding:5px 7px;border:1.5px solid #5b7189;border-radius:6px;background:#fff;color:#5b7189;font-size:10px;font-weight:800;line-height:12px;text-decoration:none;white-space:nowrap}
+.dayh .daytel svg{display:block;flex:none;width:12px;height:12px}
+.dayh .daytel span{display:block;position:relative;top:.17em}
+.dayh .daytel::after{content:"";position:absolute;left:-6px;right:-6px;top:-12px;bottom:-12px}
+.ncard .nrow{align-items:baseline;min-height:44px;padding-top:9.3px;padding-bottom:9.3px;line-height:1.4}
+.ncard .nrow i{align-self:center}
+.v7t span{position:relative;top:1.5px}
+.ncard{margin-left:6px;margin-right:6px}
+.nonote.one{white-space:nowrap;font-size:clamp(12px,3.75vw,15px)!important;letter-spacing:-.02em}
+.ncard.evS:not(.past){--c:#3B7DC4}.ncard.evF:not(.past){--c:#3c8a5c}   /* 달력 스티커와 같은 색 */
+.ncard.evS:not(.past),.ncard.evF:not(.past){border:2px solid var(--c)!important;border-left-width:.4rem!important}
+.ncard.evS:not(.past) .nrow b{color:#0B4F8A}.ncard.evF:not(.past) .nrow b{color:#14532D}
+.ncard.past{--c:#b4bdc8!important;background:#eceff2!important;border-color:#dde2e8;border-left-color:#b4bdc8}
+.ncard.past .nd,.ncard.past .nrow b,.ncard.past .nrow i,.ncard.past .nbody>p{color:#66707c}
 </style>
 </body>
 </html>
