@@ -2599,5 +2599,35 @@ html .gcin .gb small.gtm{margin-left:0}
 .ncard.past{--c:#b4bdc8!important;background:#eceff2!important;border-color:#dde2e8;border-left-color:#b4bdc8}
 .ncard.past .nd,.ncard.past .nrow b,.ncard.past .nrow i,.ncard.past .nbody>p{color:#66707c}
 </style>
+<style id="v16fix">
+/* 문의하기 +3px (글자에 비례해 박스도) */
+.dayh .daytel{font-size:13px;line-height:16px;padding:6px 9px;gap:5px;border-radius:7px}
+.dayh .daytel svg{width:16px;height:16px}
+.dayh .daytel::after{left:-4px;right:-4px;top:-8px;bottom:-8px}
+/* 요일·날짜 가운데 */
+.v7cal .wk i{justify-content:center!important;padding-left:0!important}
+.v7cal .wk b>span{align-self:center!important;margin:0 auto!important}
+</style>
+<script id="inkfix">
+/* 글꼴이 기기마다 달라서, 실제 글자 모양을 재서 아이콘(띠) 가운데에 맞춤 */
+(function(){
+  const cv=document.createElement('canvas').getContext('2d'), app=document.getElementById('app')||document.body;
+  function fix(t,ref){ if(!t||!ref||!t.offsetHeight) return; const c=getComputedStyle(t); cv.font=c.fontWeight+' '+c.fontSize+' '+c.fontFamily;
+    const m=cv.measureText(t.textContent.trim()); if(m.actualBoundingBoxAscent===undefined) return;
+    t.style.position='relative'; t.style.top='0px';
+    const p=document.createElement('i'); p.style.cssText='display:inline-block;width:0;height:0;padding:0;margin:0;border:0;vertical-align:baseline'; t.appendChild(p);
+    const base=p.getBoundingClientRect().top; p.remove();
+    const r=ref.getBoundingClientRect(), d=(r.top+r.height/2)-(base+(m.actualBoundingBoxDescent-m.actualBoundingBoxAscent)/2);
+    if(Math.abs(d)<8) t.style.top=d.toFixed(2)+'px'; }
+  let wait=0; const mo=new MutationObserver(run);
+  function run(){ if(wait) return; wait=requestAnimationFrame(function(){ wait=0; mo.disconnect();
+    document.querySelectorAll('.daytel, .v7t').forEach(e=>fix(e.querySelector('span'),e.querySelector('svg')));
+    document.querySelectorAll('.v7login').forEach(e=>{ fix(e.querySelector('b'),e); });
+    watch(); }); }
+  function watch(){ mo.observe(app,{childList:true,subtree:true}); }
+  watch(); run(); window.addEventListener('resize',run); window.addEventListener('load',run);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(run);
+})();
+</script>
 </body>
 </html>
