@@ -1233,7 +1233,8 @@ html[data-mode] .lkh{font-size:var(--t3)}
 </style>
 <style id="v7sw">.nh.v7sw{justify-content:space-between!important;flex-wrap:wrap!important;gap:.2rem .4rem!important;margin:.3rem 0 .6rem!important}.nh.v7sw .nmv{display:inline-flex;align-items:center;gap:0}.nh.v7sw .nvp{width:1.7rem!important;font-size:1.6rem!important}
 .seg{display:inline-flex;border:1px solid #BFCCDA;border-radius:999px;overflow:hidden;background:#fff;margin:0 .1rem}.seg button{border:0;background:none;font:inherit;font-size:.92rem;font-weight:700;color:#7a8a9a;padding:.3rem .9rem;cursor:pointer;white-space:nowrap}.seg button.on{background:#00457f;color:#fff}
-.nh.v7sw .v7tel{margin-left:auto;display:inline-flex;align-items:center;font-size:.98rem;font-weight:800;color:#1F7A4D;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.28em;white-space:nowrap;padding:.35rem .1rem;border:0;background:none;height:auto}.nh.v7sw .v7tel:active{opacity:.6}.nh.v7sw .ntd{flex-basis:100%}</style>
+.nh.v7sw .v7tel{margin-left:auto;display:inline-flex;align-items:center;font-size:.98rem;font-weight:800;color:#1F7A4D;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.28em;white-space:nowrap;padding:.35rem .1rem;border:0;background:none;height:auto}.nh.v7sw .v7tel:active{opacity:.6}.nh.v7sw .ntd{flex-basis:100%}.v7c1.shut{border-color:#b8c2cd;background:#f3f5f7}html .v7c1.shut .v7big:disabled{background:#c9d0d8;color:#56616d;cursor:default;box-shadow:none;animation:none}
+</style>
 </head>
 <style id="v7css">
 /* ===== v7 신청·조회 개편: 하단 알약 탭 · 세로 타임라인 · 회원 등록 ===== */
@@ -1527,11 +1528,12 @@ const whenI=s=>(dDiff(s)===0?'오늘':mdI(s))+' '+hmI(s.slice(11,16));
 function clsPlan(){ const S=PUB&&PUB.signup; if(!S||!S.per||!S.cls) return []; const n=nowKey(); return S.cls.filter(c=>c.phase==='before'&&c.start&&n<c.start).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:0); }
 const mdw=s=>mdI(s)+' ('+wdK(s)+')';                       // 12/1 (화)
 const mdwt=s=>mdw(s)+' '+s.slice(11,16);                    // 12/1 (화) 09:00
+const openAt=s=>dDiff(s)===0?'오늘 '+s.slice(11,16):mdwt(s);   // 오늘 열리면 '오늘 09:00'
 /* 반별 오픈 시간표: 아직 안 열린 반이 하나라도 있는 동안만. 열린 반은 '오픈완료' */
 function openRows(){ const S=PUB&&PUB.signup; if(!S||!S.per||!S.cls) return []; const now=nowKey();
   const L=S.cls.filter(c=>c.phase==='before'||c.phase==='open').map(c=>({id:c.id,start:c.start||'',done:!(c.phase==='before'&&c.start&&now<c.start)}));
   return L.some(c=>!c.done)?L:[]; }
-function openHtml(L){ return '<div class="opl" role="list" data-nofit><small>반별 오픈 시간</small>'+L.map(c=>'<div role="listitem" class="'+(c.done?'done':'')+'"><b>'+esc(c.id.replace(/반$/,''))+'반</b><span>'+(c.done?'오픈완료':mdwt(c.start))+'</span></div>').join('')+'</div>'; }
+function openHtml(L){ return '<div class="opl" role="list" data-nofit><small>반별 오픈 시간</small>'+L.map(c=>'<div role="listitem" class="'+(c.done?'done':'')+'"><b>'+esc(c.id.replace(/반$/,''))+'반</b><span>'+(c.done?'오픈완료':openAt(c.start))+'</span></div>').join('')+'</div>'; }
 function planHtml(p){ return '<div class="v7plan">'+p.map(c=>'<div><b>'+whenK(c.start)+'</b><span>'+esc(c.id)+' 오픈예정</span></div>').join('')+'</div>'; }
 // 기간 전 바로가기 상태: 수강신청 = 'D-5 (12/1 접수시작)' · 체력측정 예약 = '(12/4 오전09:00)' / 닫힘·끝남 = 안 보임
 function clsSoon(){ const S=PUB&&PUB.signup; if(!S) return '';
@@ -1658,14 +1660,16 @@ function endView(){
 function sigPhase(){   // open 신청 중 · before 신청 시작 전 · closed 신청 마감(수업 진행 중) · none 그 밖
   if(clsOn()) return 'open';
   const S=PUB.signup||{}, n=nowKey();
+  if(!S.per&&S.mode==='closed') return 'closed';   // 관리자가 '닫기'
   if(S.per&&S.cls&&S.cls.length){ if(S.cls.some(c=>c.phase==='before')) return 'before'; if(S.cls.every(c=>c.phase==='after'||c.phase==='closed')) return 'closed'; }   // 반별: 아직 안 열린 반이 있으면 '시작 전'
   if(!S.per&&S.start&&n<S.start) return 'before';
   if(!S.per&&S.end&&n>S.end) return 'closed';
   return PUB.classStart&&today>=PUB.classStart?'closed':'none';
 }
 function regOk(){ const p=sigPhase(); return p==='open'||p==='closed'; }   // 회원등록 안내는 신청 중·마감 뒤에만 (신청 시작 전엔 없음)
+function shutByAdmin(){ const S=PUB.signup||{}; return S.per&&S.cls&&S.cls.length?S.cls.every(c=>c.phase==='closed'):S.mode==='closed'; }
 function closedView(){
-  return '<div class="v7pad"><div class="v7c1"><div><b>수강신청이 마감되었습니다.</b><span>센터로 문의바랍니다.</span></div></div>'
+  return '<div class="v7pad"><div class="v7c1 shut"><div><b>수강신청이 마감되었습니다.</b><span>센터로 문의바랍니다.</span></div><button type="button" class="v7big" disabled>'+(shutByAdmin()?'수강신청':'마감')+'</button></div>'
    +'<div class="v7c2"><b>수강신청을 완료하셨나요?</b><button type="button" class="v7ulk in" onclick="startReg()">회원 등록</button></div></div>';
 }
 function beforeView(){
@@ -1673,9 +1677,9 @@ function beforeView(){
   if(ph==='closed') return closedView();
   const L=openRows();
   if(ph==='before'&&L.length){ const first=L.filter(c=>!c.done&&c.start).map(c=>c.start).sort()[0]||'';
-    return '<div class="v7pad"><div class="v7hd oph"><b>'+(first?mdw(first)+'부터<br>':'')+'신청 가능합니다.</b></div>'+openHtml(L)+'</div>'; }
+    return '<div class="v7pad"><div class="v7hd oph"><b>'+(first?(dDiff(first)===0?'오늘':mdw(first))+'부터<br>':'')+'신청 가능합니다.</b></div>'+openHtml(L)+'</div>'; }
   const st=ph==='before'?S.start:'';
-  return '<div class="v7mid"><b class="e0">'+(st?mdwt(st)+'부터<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
+  return '<div class="v7mid"><b class="e0">'+(st?openAt(st)+'부터<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
 }
 function newView(){
   const cs=PUB.classStart&&today<PUB.classStart?mdK(PUB.classStart)+' 수업이 시작돼요.':'신청하면 회원으로 자동 저장돼요.';
@@ -1854,7 +1858,7 @@ function memberView(){
     y={t:'done',k:'확정',sub:'확정 완료',html:'<div class="okbox"><b>'+esc(c.cls||'')+' 참여 완료</b><span>'+esc(sd)+'</span></div>'}; }
   else if(st==='hold'&&f.status!=='booked'&&f.status!=='done') y={t:'lock',k:'확정',sub:'수강 보류',html:'<div class="tlm">체력측정이 완료되어야 확정돼요.</div>'};
   else if(wl) y={t:'lock',k:'확정',sub:'잠겨 있어요'};
-  else if(nofit) y={t:'next',k:'확정',sub:'확정 대기 중',html:'<div class="tlm">잠시만 기다려 주세요.<br>담당자 확인 후<br>문자메시지와 함께 확정됩니다.</div>'};   // 예약 OFF: 신청 › 확정
+  else if(nofit) y={t:'next',k:'확정',sub:'확정 대기 중',html:'<div class="tlm">담당자 확인 후<br>문자메시지 드립니다.<br>3~5일 소요될 수 있습니다.</div>'};   // 예약 OFF: 신청 › 확정
   else if(f.status==='booked') y={t:'lock',k:'확정',sub:'체력측정이 완료되어야 확정돼요.'};
   else if(f.status==='done') y={t:'next',k:'확정',sub:'곧 확정돼요'};
   else y={t:'lock',k:'확정',sub:'잠겨 있어요'};
