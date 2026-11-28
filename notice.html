@@ -1525,6 +1525,13 @@ const wdK=s=>'일월화수목금토'.charAt(P(s.slice(0,10)).getDay());
 const whenK=s=>(dDiff(s)===0?'오늘':mdK(s)+'('+wdK(s)+')')+' '+hmI(s.slice(11,16));
 const whenI=s=>(dDiff(s)===0?'오늘':mdI(s))+' '+hmI(s.slice(11,16));
 function clsPlan(){ const S=PUB&&PUB.signup; if(!S||!S.per||!S.cls) return []; const n=nowKey(); return S.cls.filter(c=>c.phase==='before'&&c.start&&n<c.start).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:0); }
+const mdw=s=>mdI(s)+' ('+wdK(s)+')';                       // 12/1 (화)
+const mdwt=s=>mdw(s)+' '+s.slice(11,16);                    // 12/1 (화) 09:00
+/* 반별 오픈 시간표: 아직 안 열린 반이 하나라도 있는 동안만. 열린 반은 '오픈완료' */
+function openRows(){ const S=PUB&&PUB.signup; if(!S||!S.per||!S.cls) return []; const now=nowKey();
+  const L=S.cls.filter(c=>c.phase==='before'||c.phase==='open').map(c=>({id:c.id,start:c.start||'',done:!(c.phase==='before'&&c.start&&now<c.start)}));
+  return L.some(c=>!c.done)?L:[]; }
+function openHtml(L){ return '<div class="opl" role="list" data-nofit><small>반별 오픈 시간</small>'+L.map(c=>'<div role="listitem" class="'+(c.done?'done':'')+'"><b>'+esc(c.id.replace(/반$/,''))+'반</b><span>'+(c.done?'오픈완료':mdwt(c.start))+'</span></div>').join('')+'</div>'; }
 function planHtml(p){ return '<div class="v7plan">'+p.map(c=>'<div><b>'+whenK(c.start)+'</b><span>'+esc(c.id)+' 오픈예정</span></div>').join('')+'</div>'; }
 // 기간 전 바로가기 상태: 수강신청 = 'D-5 (12/1 접수시작)' · 체력측정 예약 = '(12/4 오전09:00)' / 닫힘·끝남 = 안 보임
 function clsSoon(){ const S=PUB&&PUB.signup; if(!S) return '';
@@ -1664,26 +1671,26 @@ function closedView(){
 function beforeView(){
   const S=PUB.signup||{}, ph=sigPhase();
   if(ph==='closed') return closedView();
-  const p=clsPlan();
-  if(ph==='before'&&p.length) return '<div class="v7pad"><div class="v7hd"><b>반별로 신청이 열려요</b><span>열리는 시각부터 신청할 수 있어요.</span></div>'+planHtml(p)+'</div>';
+  const L=openRows();
+  if(ph==='before'&&L.length){ const first=L.filter(c=>!c.done&&c.start).map(c=>c.start).sort()[0]||'';
+    return '<div class="v7pad"><div class="v7hd oph"><b>'+(first?mdw(first)+'부터<br>':'')+'신청 가능합니다.</b></div>'+openHtml(L)+'</div>'; }
   const st=ph==='before'?S.start:'';
-  return '<div class="v7mid"><b class="e0">'+(st?ymdK(st)+'<br>'+hmI(st.slice(11,16))+'부터<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
+  return '<div class="v7mid"><b class="e0">'+(st?mdwt(st)+'부터<br>신청 가능합니다.':'지금은 신청 기간이 아니에요.')+'</b></div>';
 }
 function newView(){
   const cs=PUB.classStart&&today<PUB.classStart?mdK(PUB.classStart)+' 수업이 시작돼요.':'신청하면 회원으로 자동 저장돼요.';
-  const p=clsPlan();
+  const L=openRows();
   return '<div class="v7pad"><div class="v7hd"><b>수강 신청을 받고 있어요</b><span>'+cs+'</span></div>'
-   +(p.length?'<div class="v7nx"><small>곧 열리는 반</small>'+planHtml(p)+'</div>':'')
    +'<div class="v7c1"><div><b>수강 신청</b><span>이름과 전화번호로 신청해요.</span></div><button type="button" class="v7big" onclick="goUrl(signupUrl())">신청하기</button></div>'
-   +'<div class="v7c2"><b>수강신청을 완료하셨나요?</b><button type="button" class="v7ulk in" onclick="startReg()">회원 등록</button></div></div>';
+   +'<div class="v7c2"><b>수강신청을 완료하셨나요?</b><button type="button" class="v7ulk in" onclick="startReg()">회원 등록</button></div>'+(L.length?openHtml(L):'')+'</div>';
 }
 /* 이 폰에 회원코드는 있는데 아직 못 불러온 상태 (불러오는 중 · 연결 실패 · 코드를 못 찾음) */
 function savedView(){
   if(LKST==='load'||!LKST) return '<div class="v7mid"><span class="e2">불러오는 중…</span></div>';
-  if(LKST==='net') return '<div class="v7pad"><div class="v7hd"><b>불러오지 못했어요</b><span>'+nl2br(RERRM)+'</span></div><button type="button" class="pri" onclick="loadMember()">다시 불러오기</button><div class="v7sm"><button type="button" onclick="reReg()">회원등록 다시하기</button></div></div>';
-  return '<div class="v7pad"><div class="v7hd"><b>회원 정보를 찾지 못했어요</b><span>이 폰에 저장된 정보가 맞지 않아요.<br>'+(regOk()?'회원등록을 다시 해 주세요.':'센터로 문의해 주세요.')+'</span></div>'+(regOk()?'<button type="button" class="pri" onclick="reReg()">회원등록 다시하기</button>':'')+'</div>';
+  if(LKST==='net') return '<div class="v7pad"><div class="v7hd"><b>불러오지 못했어요</b><span>'+nl2br(RERRM)+'</span></div><button type="button" class="pri" onclick="loadMember()">다시 불러오기</button><div class="v7sm"><button type="button" onclick="reReg()">회원등록 변경하기</button></div></div>';
+  return '<div class="v7pad"><div class="v7hd"><b>회원 정보를 찾지 못했어요</b><span>이 폰에 저장된 정보가 맞지 않아요.<br>'+(regOk()?'회원등록을 다시 해 주세요.':'센터로 문의해 주세요.')+'</span></div>'+(regOk()?'<button type="button" class="pri" onclick="reReg()">회원등록 변경하기</button>':'')+'</div>';
 }
-/* 회원등록 다시하기: 이 폰의 회원 등록을 풀고 처음(등록 전) 화면으로 → 거기서 [회원 등록]을 다시 누름 */
+/* 회원등록 변경하기: 이 폰의 회원 등록을 풀고 처음(등록 전) 화면으로 → 거기서 [회원 등록]을 다시 누름 */
 function reReg(){ ACT=null; mcSet(''); LK=null; LKST=''; RV=''; RERR=''; try{ if(typeof meClear==='function') meClear(); }catch(e){} draw(); try{ window.scrollTo(0,0); }catch(e){} }
 
 /* ---- 회원 등록 (이름·전화번호 → 비밀번호 → 회원코드) ---- */
@@ -1755,7 +1762,7 @@ function confirmHtml(){
 function actOk(){
   const k=ACT.k, tp=ACT.t, open=k==='cls'?clsOn()&&!LK.hash:true;
   if(!open){ return goUrl(telHref(tel())); }   // v5: 기간 밖 변경·취소 = 요청 없이 전화
-  if(open&&tp==='chg'){ if(k==='fit') return goFit(true); const u=signupUrl(); return goUrl(u+(u.indexOf('?')<0?'?':'&')+'chg=1'); }   // 변경은 해당 화면에서 새로 고름 (거기서 비밀번호)
+  if(open&&tp==='chg'){ if(k==='fit') return goFit(true); ACT=null; draw(); return gcAsk(); }   // 반 변경: 여기서 비밀번호만 확인하고 수강신청의 반 고르기로
   askActPw('');
 }
 /* 변경·취소할 때만 비밀번호 (이 폰은 회원코드로 확인되어 있으므로 이름·전화번호 대신 코드로 서버에 보냄) */
@@ -1810,6 +1817,12 @@ function gfAsk(err,mode,chg){
       if(r&&r.ok&&r.token){ const u=fitUrl(); return goUrl(u+(u.indexOf('?')<0?'?':'&')+'ft='+encodeURIComponent(r.token)+(chg?'&chg=1':'')); }
       if(r&&r.code==='PW') return gfAsk(r.state==='setpw'?'':r.msg,r.state==='setpw'?(r.mode||'reset'):'set',chg);
       toastMsg((r&&r.msg)||'연결이 잘 안 돼요. 잠시 후 다시 눌러 주세요.'); }); }}); }
+function gcAsk(err,mode){
+  PWP.open({mode:mode||(LK&&LK.pwMode)||'set',name:(LK&&LK.mname)||mcGet(),phone:'',sub:'수업 변경',run:pwRunC,err:err||'',
+    onDone:w=>{ api('fitTokenC',[mcGet(),w],r=>{
+      if(r&&r.ok&&r.token){ const u=signupUrl(); return goUrl(u+(u.indexOf('?')<0?'?':'&')+'chg=1&ct='+encodeURIComponent(r.token)); }
+      if(r&&r.code==='PW') return gcAsk(r.state==='setpw'?'':r.msg,r.state==='setpw'?(r.mode||'reset'):'set');
+      toastMsg((r&&r.msg)||'연결이 잘 안 돼요. 잠시 후 다시 눌러 주세요.'); }); }}); }
 function sheetHtml(){ return '<div class="lkdim"><div class="lksheet"><div class="lkgrab"></div>'+confirmHtml()+'</div></div>'; }
 
 /* ---- 회원 화면: 세로 타임라인 (신청 › 예약 › 확정) ---- */
@@ -1829,7 +1842,7 @@ function memberView(){
     else if(st==='hold'&&f.status!=='booked'&&f.status!=='done') x={t:'lock',k:'예약',sub:'예약 보류',html:fitOn()?'<button type="button" class="tgo" onclick="goFit()">체력측정 예약 바로가기 ›</button>':''};
     else if(f.status==='done') x={t:'done',k:'예약',sub:'측정 완료 · '+dlabI(f.date)};
     else if(f.status==='booked') x={t:'now',k:'예약',sub:dlabI(f.date)+' '+esc(f.time)+' 예약',
-      html:fl+(fitOn()?'<div class="tla"><button type="button" onclick="actK(\'fit\',\'chg\')">예약 변경</button><button type="button" onclick="actK(\'fit\',\'cnl\')">예약 취소</button></div>':'<div class="tlm">변경·취소는 센터로 전화해 주세요.</div>')};
+      html:fl+(fitOn()?'<div class="tla" data-nofit><button type="button" onclick="actK(\'fit\',\'chg\')">예약 변경</button><button type="button" onclick="actK(\'fit\',\'cnl\')">예약 취소</button></div>':'<div class="tlm">변경·취소는 센터로 전화해 주세요.</div>')};
     else if(ph==='open') x={t:'now',k:'예약',sub:(f.status==='cancelled'?'예약이 취소되었어요. ':'')+'지금 예약해요',html:'<button type="button" class="tgo" onclick="goFit()">체력측정 예약 바로가기 ›</button>'};
     else if(ph==='before') x={t:'next',k:'예약',sub:fitDT(F.open)+' 오픈',html:'<button type="button" class="tgo" onclick="pvOpen()">일정 미리보기 ›</button>'};
     else if(ph==='none') x={t:'lock',k:'예약',sub:'체력측정 일정은 추후 공지돼요'};
@@ -1847,21 +1860,21 @@ function memberView(){
   else y={t:'lock',k:'확정',sub:'잠겨 있어요'};
   steps.push(y); steps.forEach((x,i)=>x.n=i+1);
   let mg='';
-  if(rq.indexOf('pend')===0) mg='<div class="tla"><span class="v7pend">'+(rq==='pend-cnl'?'취소':'변경')+' 요청 중 · 승인 대기</span></div>';
-  else if(st==='wait') mg='<div class="tla"><button type="button" onclick="actK(\'cls\',\'chg\')">수업변경</button><button type="button" onclick="actK(\'cls\',\'cnl\')">수업취소</button></div>';
+  if(rq.indexOf('pend')===0) mg='<div class="tla" data-nofit><span class="v7pend">'+(rq==='pend-cnl'?'취소':'변경')+' 요청 중 · 승인 대기</span></div>';
+  else if(st==='wait') mg='<div class="tla" data-nofit><button type="button" onclick="actK(\'cls\',\'chg\')">수업변경</button><button type="button" onclick="actK(\'cls\',\'cnl\')">수업취소</button></div>';
   steps[0].html=mg;
   const th=telHref(c.staffTel||LK.staffTel||tel());
   return '<div class="v7pad"><div class="v7hd"><div class="v7hl"><span class="v7hn"><em>'+esc(LK.mname||LK.mcode||'')+'</em>님 반갑습니다.</span>'+(wl?'<span class="v7wb">대기 '+esc(c.wait||'')+'번</span>':'')+'</div><span>'+(nofit?'신청 › 확정':'신청 › 예약 › 확정')+' 순서로 진행돼요.</span></div>'
    +(rq?'':(c.last?'<div class="v7ln">'+lastNote(c.last)+'</div>':''))
    +'<div class="v7tl">'+steps.map((x,i)=>tlStep(x,i===steps.length-1)).join('')+'</div>'
    +(th?'<div class="v7sm"><a href="'+th+'">담당자 연결</a></div>':'')
-   +(regOk()?'<div class="v7sm"><button type="button" onclick="reReg()">회원등록 다시하기</button></div>':'')+'</div>';
+   +(regOk()?'<div class="v7sm"><button type="button" onclick="reReg()">회원등록 변경하기</button></div>':'')+'</div>';
 }
 function cxlView(){
-  const c=LK.cls, th=telHref(c.staffTel||LK.staffTel||tel());
+  const c=LK.cls;
   return '<div class="v7pad"><div class="v7hd"><b><em class="v7cd">'+esc(LK.mname||LK.mcode||'')+'</em>님</b><span>신청이 취소되었어요.</span></div><div class="rcard off"><small>수강신청</small><b>'+esc(c.label||'')+'</b><small style="margin-top:.3rem">'+nl2br(c.why||'자세한 내용은 센터로 문의해 주세요.')+'</small></div>'
    +(clsOn()?'<button type="button" class="pri" onclick="goUrl(signupUrl())">다시 신청하기</button>':'')
-   +(th?'<div class="v7sm"><a href="'+th+'">담당자 연결</a></div>':'')+(regOk()?'<div class="v7sm"><button type="button" onclick="reReg()">회원등록 다시하기</button></div>':'')+'</div>';
+   +(regOk()?'<div class="v7sm"><button type="button" onclick="reReg()">회원등록 변경하기</button></div>':'')+'</div>';
 }
 function draw(){
   if(!PUB) return;
@@ -1870,7 +1883,7 @@ function draw(){
 function gcovFit(){ const c=$('gcov'); if(!c) return; const w=c.parentElement, r=w.getBoundingClientRect(), sc=$('scr').getBoundingClientRect(); c.style.top=Math.max(0,r.bottom+6)+'px'; c.style.left=sc.left+'px'; c.style.width=sc.width+'px'; }
 addEventListener('resize',gcovFit); addEventListener('scroll',gcovFit,true);
 // 38: 1분마다 기간을 다시 보고 바뀌었으면 다시 그림 (마감 시각이 지나면 바로가기·팝업이 사라짐)
-let ONK=''; setInterval(()=>{ if(!PUB||SHEET) return; const k=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon(); if(ONK&&k!==ONK){ if(GPOP&&!clsOn()&&!fitOn()) GPOP=0; draw(); if(clsOn()||fitOn()) gpopMaybe(); } ONK=k; },20000);
+let ONK=''; setInterval(()=>{ if(!PUB||SHEET) return; const k=(clsOn()?1:0)+''+(fitOn()?1:0)+clsSoon()+fitSoon()+openRows().map(c=>c.done?1:0).join(''); if(ONK&&k!==ONK){ if(GPOP&&!clsOn()&&!fitOn()) GPOP=0; draw(); if(clsOn()||fitOn()) gpopMaybe(); } ONK=k; },20000);
 // v4: 체력측정 = 관리자설정에서 자동 (손으로 적은 '체력측정 예약 접수'·'체력측정 기간' 일정은 안 보임)
 //   검사 기간 = 달력 띠(제외일 빼고) · 예약 접수 = 시작일·마감일에만 표시 · 목록은 한 묶음
 const FDUP=e=>/체력\s*(측정|검사)\s*(예약|기간)/.test(e.t||'');
@@ -2629,5 +2642,16 @@ html .gcin .gb small.gtm{margin-left:0}
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(run);
 })();
 </script>
+<style id="oplcss">
+.tla{flex-wrap:wrap;column-gap:1.1rem}.tla button{white-space:nowrap}
+.v7hd.oph b{display:block;text-align:center;font-size:1.5rem;line-height:1.45}
+.opl{margin:.9rem 0;background:#fff;border:1px solid #dde5ee;border-radius:.9rem;padding:.3rem .9rem}
+.opl>small{display:block;padding:.45rem 0 .35rem;font-size:.9rem;font-weight:800;color:#5b7189;border-bottom:1px solid #e6ecf2}
+.opl>div{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.15rem .6rem;padding:.55rem 0;border-bottom:1px solid #eef2f6;white-space:nowrap}
+.opl>div:last-child{border-bottom:0}
+.opl b{font-size:1.1rem;font-weight:800;color:#2f3a45}
+.opl span{margin-left:auto;font-size:1.1rem;font-weight:800;color:#00457f;font-variant-numeric:tabular-nums}
+.opl .done span{font-size:.95rem;color:#14532d;background:#e3f1e8;border-radius:99px;padding:.15rem .7rem}
+</style>
 </body>
 </html>
